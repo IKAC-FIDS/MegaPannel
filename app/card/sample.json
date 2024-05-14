@@ -1,0 +1,116 @@
+[
+  {
+    "cardRequest": {
+      "id": "1170b24c-6895-4bd9-a0da-a18a34bef13c",
+      "cardTemplateId": "87c5b9a1-ff93-4499-982e-38e76e7ec735",
+      "userId": "98387f18-0ab5-4496-a545-5782112b8e2e",
+      "status": 4,
+      "message": null,
+      "createdDateUtc": "2024-02-05T20:23:40.410067Z",
+      "address": "استان کرمان، شهرستان رفسنجان، بخش مرکزی، شهر رفسنجان، الله آباد، کوچه ((علی پاکار))، کوچه سردار جنگل ۱، پلاک ۲۵، طبقه همکف",
+      "sameCardNumber": false,
+      "accountNumber": "3403-713-640976-1",
+      "cardNumber": "6396071280081928"
+    },
+    "userInfo": {
+      "nationalCode": "3052290207",
+      "phoneNumber": "09133939406",
+      "birthdate": "1365-02-25",
+      "bookNumber": 0,
+      "name": "احسان",
+      "lastName": "يزدان كشكو",
+      "fatherName": "محمدحسن",
+      "gender": "Male",
+      "officeCode": "642",
+      "officeName": "تجريش - تجريش",
+      "nationalNumber": "186",
+      "nationalSeri": "ا22",
+      "nationalSerial": "862974",
+      "cardSerial": "8M15237398"
+    },
+    "cardInfo": {
+      "number": "6396071280081928",
+      "cvv2": "863",
+      "track1": "B6396071280081928^YAZDA KOSHKKO/EHSAN.MR^290210086324021929391424",
+      "track2": "6396071280081928=29021008634127245809",
+      "track3": "01==3644000000004036003=0009999=1099651367==0=12824024278215343",
+      "bankTypeExpireDate": "140711",
+      "expireDateUtc": "2029-01-31T20:30:00Z",
+      "disabled": true,
+      "disabledDateUtc": null,
+      "terminated": false,
+      "terminatedDateUtc": null,
+      "createdDateUtc": "2024-02-05T20:23:49.367309Z",
+      "templateId": "87c5b9a1-ff93-4499-982e-38e76e7ec735",
+      "userId": "98387f18-0ab5-4496-a545-5782112b8e2e",
+      "accountNumber": "3403-713-640976-1"
+    },
+    "cardTemplateInfo": {
+      "name": "darblue",
+      "title": "darblue",
+      "code": "76",
+      "color": "{}",
+      "image": "vk6LyevfyUGV9iYsE-qPmA",
+      "disabled": false,
+      "order": 5,
+      "inventory": 1967
+    }
+  },
+  {
+    "cardRequest": {
+      "id": "a46ad85f-82c4-43f8-9b15-f121ddecf171",
+      "cardTemplateId": "ef25fe7f-5613-4fce-8c8d-6b4371b496db",
+      "userId": "6d49e74a-2fe6-4d12-b54c-bc8f8c071463",
+      "status": 4,
+      "message": null,
+      "createdDateUtc": "2024-02-12T07:58:24.098024Z",
+      "address": "استان تهران، شهرستان تهران، بخش مرکزی، شهر تهران، شهرک پرواز، خیابان پروانه جنوبی، کوچه هفدهم غربی، پلاک ۲، طبقه ۴، واحد ۱۲",
+      "sameCardNumber": false,
+      "accountNumber": "1014-746-2140319-1",
+      "cardNumber": "6396071280082041"
+    },
+    "userInfo": {
+      "nationalCode": "4609022206",
+      "phoneNumber": "09123751079",
+      "birthdate": "1345-07-17",
+      "bookNumber": 0,
+      "name": "يزدان",
+      "lastName": "آقااشرفي",
+      "fatherName": "رضا",
+      "gender": "Male",
+      "officeCode": "530",
+      "officeName": "گرمسار - گرمسار",
+      "nationalNumber": "960",
+      "nationalSeri": "ا27",
+      "nationalSerial": "562390",
+      "cardSerial": "2M15588067"
+    },
+    "cardInfo": {
+      "number": "6396071280082041",
+      "cvv2": "719",
+      "track1": "B6396071280082041^A/A.MR^290210071924023791652544",
+      "track2": "6396071280082041=29021007191006661966",
+      "track3": "01==3644000000004043003=0009999=1378498349==0=12824023070286591",
+      "bankTypeExpireDate": "140711",
+      "expireDateUtc": "2029-01-31T20:30:00Z",
+      "disabled": true,
+      "disabledDateUtc": null,
+      "terminated": false,
+      "terminatedDateUtc": null,
+      "createdDateUtc": "2024-02-12T07:58:32.495118Z",
+      "templateId": "ef25fe7f-5613-4fce-8c8d-6b4371b496db",
+      "userId": "6d49e74a-2fe6-4d12-b54c-bc8f8c071463",
+      "accountNumber": "1014-746-2140319-1"
+    },
+    "cardTemplateInfo": {
+      "name": "blue",
+      "title": "blue",
+      "code": "76",
+      "color": "{}",
+      "image": "iFGVAJUrEEmlVB8ysD_cqg",
+      "disabled": false,
+      "order": 7,
+      "inventory": 344
+    }
+  }
+]
