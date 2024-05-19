@@ -5,12 +5,14 @@ import Link from "next/link";
 import Input from "@/app/shard/components/Input";
 import React from "react";
 import Button from "@/app/shard/components/Button";
+import style from "./styles.module.css"
 
 export default function Home() {
     // middelware
     return (
         <>
-            <div className={'w-full h-screen flex justify-center items-center bg-blue-700'}
+            {/*'w-full h-screen flex justify-center items-center '*/}
+            <div className={`${style.login_background } w-full h-screen flex justify-center items-center bg-blue-700`}
                  // style={{backgroundImage: `${url(`@/app/shard/assets/images/Shape.svg)`}`}}
             >
                 <div className={'bg-white w-1/3 h-96 p-8 rounded-lg'}>

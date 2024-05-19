@@ -25,7 +25,7 @@ const ModalComponent : React.FC<OpenModalProps> = ({children}:OpenModalProps)=> 
                     {(onClose) => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">
-                                Modal Title
+                          مشخصات
                             </ModalHeader>
                             <ModalBody>
 
@@ -36,9 +36,9 @@ const ModalComponent : React.FC<OpenModalProps> = ({children}:OpenModalProps)=> 
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={onClose}>
-                                    Action
-                                </Button>
+                                {/*<Button color="primary" onPress={onClose}>*/}
+                                {/*    Action*/}
+                                {/*</Button>*/}
                             </ModalFooter>
                         </>
                     )}

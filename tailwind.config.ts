@@ -38,6 +38,8 @@ const config: Config = {
 
         },
         Indigo:{
+          600:"#a8abac",
+          700:"#f9f9fa",
           800:"#f5f5f5",
           900:"#4C49ED",
 
@@ -78,7 +80,7 @@ const config: Config = {
   },
 
   darkMode: "class",
-  plugins: [nextui(),  require('tailwindcss-rtl'),],
+  plugins: [nextui(),  require('tailwindcss-rtl'), require('tailwind-scrollbar')],
 
 };
 export default config;

@@ -39,9 +39,6 @@ const card = [
     },
 ]
 
-
-
-
 const dashboard = [
     { href: '/dashboard', label: 'Dashboard', activeColor: 'blue-700',
         icon:
@@ -153,6 +150,8 @@ const dashboard = [
     },
 
 ];
+
+
 
 
 export default sideTabs

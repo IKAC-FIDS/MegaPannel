@@ -1,0 +1,8 @@
+.login_background{
+    background-image: url("./shard/assets/images/Shape.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+
+/*'w-full h-screen flex justify-center items-center bg-blue-700'*/

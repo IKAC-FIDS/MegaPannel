@@ -15,7 +15,7 @@ import {
 import {EditIcon} from "./EditIcon";
 import {DeleteIcon} from "./DeleteIcon";
 import {Tabs, Tab, Card, CardBody} from "@nextui-org/react";
-import {columns} from "./data";
+import {columns, users} from "./data";
 import card from "@/app/card/sample.json"
 
 import ExportToExcel from "@/app/shard/components/ExportToExcel";
@@ -107,7 +107,7 @@ const TableComponent = () => {
         switch (columnKey) {
             case "date":
                 return (
-                    <div>{utcToShamsi(card.cardInfo.expireDateUtc)}</div>
+                    <div>{utcToShamsi(card.cardInfo.createdDateUtc)}</div>
                 )
             case "name":
                 return (
@@ -138,21 +138,18 @@ const TableComponent = () => {
             case "actions":
                 return (
                     <div className="relative flex items-center gap-2">
-                        <Tooltip content="Details">
-              <span onClick={() => {
-
-
-              }} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                        <Tooltip content="مشخصات">
+              <span onClick={() => {}} className="text-lg text-default-400 cursor-pointer active:opacity-50">
           <Modal>
                 <div className="flex w-full flex-col">
       <Tabs aria-label="Options">
         <Tab key="photos" title="مشخصات کاربر">
-          <Card>
+          <Card className={" min-h-80"}>
             <CardBody>
                 <div className={"flex gap-5 mb-3"}>
 
-             <Input labelPlacement={"outside"} label="نام و نام خانوادگی" isDisabled
-                    defaultValue={card.userInfo.name + " " + card.userInfo.lastName} labelPlacement="outside"/>
+             <Input size={"lg"} labelPlacement={"outside"} label="نام و نام خانوادگی" isDisabled
+                    defaultValue={card.userInfo.name + " " + card.userInfo.lastName} labelPlacement="outside" placeholder={""}/>
 
              <Input labelPlacement={"outside"} label="کد ملی" isDisabled
                     defaultValue={card.userInfo.nationalCode}/>
@@ -164,28 +161,47 @@ const TableComponent = () => {
              <Input labelPlacement={"outside"} label="تاریخ تولد" isDisabled
                     defaultValue={card.userInfo.birthdate}/>
 
-             <Input labelPlacement={"outside"} label="تلفن همراه" isDisabled
-                    defaultValue={card.userInfo.phoneNumber}/>
+             <Input isDisabled
+                    type="text"
+                    label="تلفن همراه"
+                    placeholder="you@example.com"
+                    labelPlacement="outside"defaultValue={card.userInfo.phoneNumber}/>
 
                 </div>
 
             </CardBody>
           </Card>
         </Tab>
-        <Tab key="music" title="Music">
-          <Card>
+        <Tab key="cardInfo" title="اطلاعات کارت">
+          <Card className={"min-h-80"}>
             <CardBody>
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              <div className={"flex gap-5 mb-3"}>
+
+             <Input labelPlacement={"outside"} label="شماره کارت" isDisabled
+                    defaultValue={card.cardRequest.cardNumber} labelPlacement="outside"/>
+
+             <Input labelPlacement={"outside"} label="شماره حساب" isDisabled
+                    defaultValue={card.cardInfo.accountNumber}/>
+
+                </div>
+
+                <div className={"flex gap-5 mb-3"}>
+
+                 <Input labelPlacement={"outside"} label="تاریخ افتتاح حساب" isDisabled
+                        defaultValue={utcToShamsi(card.cardRequest.createdDateUtc)}/>
+
+                  <Input labelPlacement={"outside"} label="تاریخ انقضا" isDisabled
+                         defaultValue={utcToShamsi(card.cardInfo.bankTypeExpireDate)}/>
+                </div>
+                   <div>
+                        <div className={"text-Indigo-600 w-full text-start mb-3"}>آدرس</div>
+                        <div
+                            className={"bg-Indigo-700 text-Indigo-600 p-6 rounded-xl text-start"}>{card.cardRequest.address}</div>
+                    </div>
             </CardBody>
           </Card>
         </Tab>
-        <Tab key="videos" title="Videos">
-          <Card>
-            <CardBody>
-              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </CardBody>
-          </Card>
-        </Tab>
+
       </Tabs>
     </div>
             </Modal>
@@ -208,40 +224,61 @@ const TableComponent = () => {
         }
     }, []);
 
-    const [test, setTest] = useState<boolean>(false)
+    function transformData(originalData: any[], keyMap: Record<string, string>, keyOrder: string[]): any[] {
+        return originalData.map(item => {
+            const newItem: any = {};
+            keyOrder.forEach(key => {
+                const originalKey = keyMap[key] || key;
+                if (typeof item[originalKey] === "object") {
+                    for (const innerKey in item[originalKey]) {
+                        const newInnerKey = keyMap[innerKey] || innerKey;
+                        newItem[newInnerKey] = item[originalKey][innerKey];
+                    }
+                } else {
+                    newItem[key] = item[originalKey];
+                }
+            });
+            return newItem;
+        });
+    }
 
-    // const FilteredColumn=(array:[],options:{})=>{
-    //     const FilteredColumn = array.map(item => {
-    //         const { options, ...rest } = item; // Using object destructuring to exclude 'avatar' property
-    //         return rest;
-    //     });
-    // }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Example usage
+    const data = [
+        {
+            detail: {
+                name: "hasan",
+                family: "hasani"
+            },
+            car: {
+                model: "peykan",
+                color: "ghanari"
+            }
+        },
+        {
+            detail: {
+                name: "mamad",
+                family: "abdoli"
+            },
+            car: {
+                model: "gari",
+                color: "ghahve ei"
+            }
+        }
+    ];
 
-    // const FilteredColumn = card.map(item => {
-    //     const { gender, ...rest } = item.userInfo.gender; // Using object destructuring to exclude 'avatar' property
-    //     return rest;
-    // });
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //     this is for obtional key
-    // let obj = {foo: 1, bar: 2, baz: 3}
-    // function removeProperty(obj, propertyName) {
-    //     let { [propertyName]: _, ...result } = obj
-    //     return result
-    // }
-    // console.log(removeProperty(obj, 'foo'));
-    // {
-    //     "bar": 2,
-    //     "baz": 3
-    // }
+    const keyMap = {
+        name: "person",
+        lastName: "mashin",
+        fatherName: "car",
+        gender: "rang"
+    };
 
-    //////////////////////////////////////////////////
-    const [cardInfo, setCardInfo] = useState<boolean | undefined>(true);
-// const getCardInfo=()=>{
-//     card.map((item)=>{
-//         setCardInfo(item)
-//     })
-// }
+
+
+    const keyOrder = ["name", "lastName", "fatherName", "gender"]; // Specify the desired order of keys
+
+
+
     return (
         <>
             <Table aria-label="Example table with custom cells">
@@ -262,7 +299,6 @@ const TableComponent = () => {
 
             </Table>
 
-            {/*<ExportToExcel apiData={FilteredColumn} fileName={'filtershode'}/>*/}
 
         </>
 
