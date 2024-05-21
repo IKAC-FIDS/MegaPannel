@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {
     Table,
     TableHeader,
@@ -29,14 +29,13 @@ import axiosInstance from "@/app/configurations/api/axiosInstance";
 import useSWR from "swr";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
-    1: "success",
-    2: "danger",
-    3: "warning",
-    4: "danger",
-    5: "primary",
-    6: "default",
+    1: "warning",
+    2: "secondary",
+    3: "danger",
+    4: "primary",
+    5: "success",
+    7: "default"
 };
-
 
 interface Card {
     cardRequest: CardRequest;
@@ -105,15 +104,19 @@ interface CardRequest {
 }
 
 
-const getCardRequests = async (currentPage: number) => {
+const getCardRequests = async (currentPage: number, status: number, filter: string) => {
+    const statusCode = status ? `&status=${status}` : ""
+
     const response = await axiosInstance.get(
-        `http://192.168.106.7:7272/api/card-requests?currentPage=${currentPage}&pageSize=${10}`
+        `http://192.168.106.7:7040/api/card-requests?currentPage=${currentPage}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
     );
     if (response.status === 200) {
-        console.log(response)
         return response.data
-    } else console.log("nashod")
+    }
 
+}
+const checkStatus = (status: number) => {
+    return statusList.find(({id}) => id === status)?.label;
 }
 
 const checkNull = (value: string | number) => {
@@ -126,71 +129,61 @@ const checkNull = (value: string | number) => {
 
 const statusList = [
     {
+        id: 0,
+        label: "همه"
+
+    }
+    , {
         id: 1,
-        lable: "در انتظار صدور"
+        label: "در انتظار صدور"
     },
     {
         id: 2,
-        lable: "صادر شده"
+        label: "صادر شده"
     },
     {
         id: 3,
-        lable: "ناموفق"
+        label: "ناموفق"
     }, {
         id: 4,
-        lable: "چاپ شده"
+        label: "چاپ شده"
     }, {
         id: 5,
-        lable: "فعال"
+        label: "فعال"
     },
     {
         id: 6,
-        lable: "نامشخص"
+        label: "نامشخص"
     },
     {
         id: 7,
-        lable: "خطا در عملیات"
+        label: "خطا در عملیات"
     },
 
 ]
-const checkStatus = (status: number) => {
 
-    switch (status) {
-        case 1:
-            return "در انتظار"
-        case 2:
-            return "تایید شده"
-        case 3 :
-            return "لغو شده"
-        case 4 :
-            return "ارسال"
-        case 5:
-            return "انجام شده"
-        case 6:
-            return "ناشناخته"
-        case 7:
-            return "اپراتور"
-        default:
-            return undefined
-    }
-}
 
 const TableComponent = () => {
 
+    const [selectedStatus, setSelectedStatus] = useState<number>(0)
+    const [filter, setFilter] = useState<string>("")
     const [page, setPage] = React.useState(1);
-
+    let typingTimeout: NodeJS.Timeout | null = null;
 
     const {
         data: cardRequests,
         isValidating,
         isLoading
-    } = useSWR(`http://192.168.106.7:7042/api/card-requests?page=${page}`
-        , async () => await getCardRequests(page), {keepPreviousData: true,});
+    } = useSWR(`http://192.168.106.7:7040/api/card-requests?page=${page}&status=${selectedStatus}&filter=${filter}`
+        , async () => await getCardRequests(page, selectedStatus, filter), {keepPreviousData: true,});
 
     const rowsPerPage = 10;
 
+
+    console.log(cardRequests)
+
     const pages = useMemo(() => {
-        return cardRequests?.totalPageCount ? Math.ceil(cardRequests.totalPageCount / rowsPerPage) : 0;
+        return cardRequests?.totalPageCount ? Math.ceil(cardRequests.totalPageCount) : 0;
     }, [cardRequests?.totalPageCount, rowsPerPage]);
 
 
@@ -227,12 +220,13 @@ const TableComponent = () => {
             case "status":
                 return (
                     <Chip
-                        className={`capitalize ${card.cardRequest?.status && card.cardRequest?.status === 7 ? `bg-[#FFE0EB ]` : ""}`}
+                        className={`capitalize ${card.cardRequest?.status && card.cardRequest?.status === 6 ? `bg-red-600 text-red-200` : ""}`}
                         color={statusColorMap[card.cardRequest.status]} size="sm"
                         variant="flat">
                         {
                             checkStatus(card.cardRequest?.status)
                         }
+
                     </Chip>
                 );
             case "actions":
@@ -328,76 +322,33 @@ const TableComponent = () => {
         }
     }, []);
 
-    function transformData(originalData: any[], keyMap: Record<string, string>, keyOrder: string[]): any[] {
-        return originalData.map(item => {
-            const newItem: any = {};
-            keyOrder.forEach(key => {
-                const originalKey = keyMap[key] || key;
-                if (typeof item[originalKey] === "object") {
-                    for (const innerKey in item[originalKey]) {
-                        const newInnerKey = keyMap[innerKey] || innerKey;
-                        newItem[newInnerKey] = item[originalKey][innerKey];
-                    }
-                } else {
-                    newItem[key] = item[originalKey];
-                }
-            });
-            return newItem;
-        });
-    }
-
-// Example usage
-    const data = [
-        {
-            detail: {
-                name: "hasan",
-                family: "hasani"
-            },
-            car: {
-                model: "peykan",
-                color: "ghanari"
-            }
-        },
-        {
-            detail: {
-                name: "mamad",
-                family: "abdoli"
-            },
-            car: {
-                model: "gari",
-                color: "ghahve ei"
-            }
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (typingTimeout) {
+            clearTimeout(typingTimeout);
         }
-    ];
-
-    const keyMap = {
-        name: "person",
-        lastName: "mashin",
-        fatherName: "car",
-        gender: "rang"
+        typingTimeout = setTimeout(() => {
+            if (value.length >= 3 || !value.length) setFilter(value)
+        }, 500);
     };
 
-
-    const keyOrder = ["name", "lastName", "fatherName", "gender"]; // Specify the desired order of keys
+    const topContent = React.useMemo(() => {
+        return (
+            <div className={"rounded-full w-64 h-12 hidden lg:flex items-center justify-center"}>
+                <Input onChange={handleInputChange} className={"rounded-full"} size={"lg"}
+                       labelPlacement={"outside-left"} placeholder="جستو وجو"/>
+            </div>
+        )
+    })
 
 
     if (!cardRequests) return (<p>loading</p>)
 
     return (
         <>
-            <div>
-                <Select
-                    label="Select an animal"
-                    className="max-w-xs"
-                >
-                    {cardRequests.data.map((animal: Card) => (
-                        <SelectItem key={animal.cardRequest.id}>
-                            {checkStatus(animal.cardRequest.status)}
-                        </SelectItem>
-                    ))}
-                </Select>
-            </div>
+
             <Table
+                topContent={topContent}
                 bottomContent={
                     pages > 0 ? (
                         <div className="flex w-full justify-center" style={{direction: "ltr"}}>
@@ -418,11 +369,33 @@ const TableComponent = () => {
                 aria-label="Example table with custom cells">
                 <TableHeader columns={columns}>
                     {(column) => (
+
+
                         <TableColumn key={column.uid} className={"text-start"} align={"center"}>
-                            {column.name}
+                            <div className={"flex items-center"}>
+                                {column.uid === "status" ?
+                                    <>وضعیت: <Select
+
+                                        className="w-40"
+                                        defaultSelectedKeys={[0]}
+
+                                    >
+                                        {statusList.map((item) => (
+                                            <SelectItem key={item.id} value={selectedStatus}
+                                                        onClick={() => {
+                                                            setSelectedStatus(item.id)
+                                                            setPage(1)
+                                                        }}>
+                                                {item.label}
+                                            </SelectItem>
+                                        ))}
+                                    </Select> </> : column.name}
+                            </div>
                         </TableColumn>
+
                     )}
                 </TableHeader>
+
                 <TableBody items={cardRequests.data}>
                     {(card: Card) => (
                         <TableRow key={card.cardRequest.id}>
