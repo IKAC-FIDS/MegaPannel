@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useMemo, useState} from "react";
 import {
     Table,
     TableHeader,
@@ -10,12 +10,14 @@ import {
     Chip,
     Tooltip,
     ChipProps,
-    getKeyValue
+    getKeyValue, Pagination,
+    Select,
+    SelectItem
 } from "@nextui-org/react";
 import {EditIcon} from "./EditIcon";
 import {DeleteIcon} from "./DeleteIcon";
 import {Tabs, Tab, Card, CardBody} from "@nextui-org/react";
-import {columns, users} from "./data";
+import {columns} from "./data";
 import card from "@/app/card/sample.json"
 
 import ExportToExcel from "@/app/shard/components/ExportToExcel";
@@ -23,11 +25,16 @@ import Button from "@/app/shard/components/Button";
 import Modal from "@/app/shard/components/Modal";
 import {utcToShamsi} from "@/app/shard/utils/utcToShamsi";
 import Input from "@/app/shard/components/Input";
+import axiosInstance from "@/app/configurations/api/axiosInstance";
+import useSWR from "swr";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     1: "success",
     2: "danger",
-    4: "warning",
+    3: "warning",
+    4: "danger",
+    5: "primary",
+    6: "default",
 };
 
 
@@ -98,48 +105,142 @@ interface CardRequest {
 }
 
 
+const getCardRequests = async (currentPage: number) => {
+    const response = await axiosInstance.get(
+        `http://192.168.106.7:7272/api/card-requests?currentPage=${currentPage}&pageSize=${10}`
+    );
+    if (response.status === 200) {
+        console.log(response)
+        return response.data
+    } else console.log("nashod")
+
+}
+
+const checkNull = (value: string | number) => {
+
+    if (value) return value
+
+    return "نامشخص"
+
+}
+
+const statusList = [
+    {
+        id: 1,
+        lable: "در انتظار صدور"
+    },
+    {
+        id: 2,
+        lable: "صادر شده"
+    },
+    {
+        id: 3,
+        lable: "ناموفق"
+    }, {
+        id: 4,
+        lable: "چاپ شده"
+    }, {
+        id: 5,
+        lable: "فعال"
+    },
+    {
+        id: 6,
+        lable: "نامشخص"
+    },
+    {
+        id: 7,
+        lable: "خطا در عملیات"
+    },
+
+]
+const checkStatus = (status: number) => {
+
+    switch (status) {
+        case 1:
+            return "در انتظار"
+        case 2:
+            return "تایید شده"
+        case 3 :
+            return "لغو شده"
+        case 4 :
+            return "ارسال"
+        case 5:
+            return "انجام شده"
+        case 6:
+            return "ناشناخته"
+        case 7:
+            return "اپراتور"
+        default:
+            return undefined
+    }
+}
+
 const TableComponent = () => {
+
+    const [page, setPage] = React.useState(1);
+
+
+    const {
+        data: cardRequests,
+        isValidating,
+        isLoading
+    } = useSWR(`http://192.168.106.7:7042/api/card-requests?page=${page}`
+        , async () => await getCardRequests(page), {keepPreviousData: true,});
+
+    const rowsPerPage = 10;
+
+    const pages = useMemo(() => {
+        return cardRequests?.totalPageCount ? Math.ceil(cardRequests.totalPageCount / rowsPerPage) : 0;
+    }, [cardRequests?.totalPageCount, rowsPerPage]);
 
 
     const renderCell = React.useCallback((card: Card, columnKey: React.Key) => {
+
         const cellValue = card[columnKey as keyof Card];
 
         switch (columnKey) {
+
             case "date":
                 return (
-                    <div>{utcToShamsi(card.cardInfo.createdDateUtc)}</div>
+                    <div>{utcToShamsi(card.cardRequest?.createdDateUtc)}</div>
                 )
             case "name":
                 return (
                     <div className={'flex gap-1'}>
-                        <p>{card.userInfo.name}</p>
-                        <p>{card.userInfo.lastName}</p>
+
+                        <p>{checkNull(card.userInfo?.name)}</p>
+                        <p>{checkNull(card.userInfo?.lastName)}</p>
                     </div>
                 );
             case "nationalCode":
                 return (
                     <div className="flex flex-col">
-                        <p className="text-bold text-sm capitalize">{card.userInfo.nationalCode}</p>
+                        <p>{checkNull(card.userInfo?.nationalCode)}</p>
                     </div>
                 );
             case "phoneNumber":
                 return (
                     <div>
-                        {card.userInfo.phoneNumber}
+                        {checkNull(card.userInfo?.phoneNumber)}
                     </div>
                 )
             case "status":
                 return (
-                    <Chip className="capitalize" color={statusColorMap[card.cardRequest.status]} size="sm"
-                          variant="flat">
-                        {card.cardRequest.status}
+                    <Chip
+                        className={`capitalize ${card.cardRequest?.status && card.cardRequest?.status === 7 ? `bg-[#FFE0EB ]` : ""}`}
+                        color={statusColorMap[card.cardRequest.status]} size="sm"
+                        variant="flat">
+                        {
+                            checkStatus(card.cardRequest?.status)
+                        }
                     </Chip>
                 );
             case "actions":
                 return (
                     <div className="relative flex items-center gap-2">
                         <Tooltip content="مشخصات">
-              <span onClick={() => {}} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+              <span onClick={() => {
+              }} className="text-lg text-default-400 cursor-pointer active:opacity-50">
           <Modal>
                 <div className="flex w-full flex-col">
       <Tabs aria-label="Options">
@@ -149,23 +250,26 @@ const TableComponent = () => {
                 <div className={"flex gap-5 mb-3"}>
 
              <Input size={"lg"} labelPlacement={"outside"} label="نام و نام خانوادگی" isDisabled
-                    defaultValue={card.userInfo.name + " " + card.userInfo.lastName} labelPlacement="outside" placeholder={""}/>
+                    defaultValue={
+                        checkNull(card.userInfo?.name + " " + card.userInfo?.lastName)
+
+                    } labelPlacement="outside" placeholder={""}/>
 
              <Input labelPlacement={"outside"} label="کد ملی" isDisabled
-                    defaultValue={card.userInfo.nationalCode}/>
+                    defaultValue={checkNull(card.userInfo?.nationalCode)}/>
 
                 </div>
 
                 <div className={"flex gap-5"}>
 
              <Input labelPlacement={"outside"} label="تاریخ تولد" isDisabled
-                    defaultValue={card.userInfo.birthdate}/>
+                    defaultValue={checkNull(card.userInfo?.birthdate)}/>
 
              <Input isDisabled
                     type="text"
                     label="تلفن همراه"
                     placeholder="you@example.com"
-                    labelPlacement="outside"defaultValue={card.userInfo.phoneNumber}/>
+                    labelPlacement="outside" defaultValue={checkNull(card.userInfo?.phoneNumber)}/>
 
                 </div>
 
@@ -178,25 +282,25 @@ const TableComponent = () => {
               <div className={"flex gap-5 mb-3"}>
 
              <Input labelPlacement={"outside"} label="شماره کارت" isDisabled
-                    defaultValue={card.cardRequest.cardNumber} labelPlacement="outside"/>
+                    defaultValue={checkNull(card.cardRequest?.cardNumber)} labelPlacement="outside"/>
 
              <Input labelPlacement={"outside"} label="شماره حساب" isDisabled
-                    defaultValue={card.cardInfo.accountNumber}/>
+                    defaultValue={checkNull(card.cardInfo?.accountNumber)}/>
 
                 </div>
 
                 <div className={"flex gap-5 mb-3"}>
 
                  <Input labelPlacement={"outside"} label="تاریخ افتتاح حساب" isDisabled
-                        defaultValue={utcToShamsi(card.cardRequest.createdDateUtc)}/>
+                        defaultValue={utcToShamsi(card.cardRequest?.createdDateUtc)}/>
 
                   <Input labelPlacement={"outside"} label="تاریخ انقضا" isDisabled
-                         defaultValue={utcToShamsi(card.cardInfo.bankTypeExpireDate)}/>
+                         defaultValue={utcToShamsi(card.cardInfo?.bankTypeExpireDate)}/>
                 </div>
                    <div>
                         <div className={"text-Indigo-600 w-full text-start mb-3"}>آدرس</div>
                         <div
-                            className={"bg-Indigo-700 text-Indigo-600 p-6 rounded-xl text-start"}>{card.cardRequest.address}</div>
+                            className={"bg-Indigo-700 text-Indigo-600 p-6 rounded-xl text-start"}>{checkNull(card.cardRequest?.address)}</div>
                     </div>
             </CardBody>
           </Card>
@@ -274,14 +378,44 @@ const TableComponent = () => {
     };
 
 
-
     const keyOrder = ["name", "lastName", "fatherName", "gender"]; // Specify the desired order of keys
 
 
+    if (!cardRequests) return (<p>loading</p>)
 
     return (
         <>
-            <Table aria-label="Example table with custom cells">
+            <div>
+                <Select
+                    label="Select an animal"
+                    className="max-w-xs"
+                >
+                    {cardRequests.data.map((animal: Card) => (
+                        <SelectItem key={animal.cardRequest.id}>
+                            {checkStatus(animal.cardRequest.status)}
+                        </SelectItem>
+                    ))}
+                </Select>
+            </div>
+            <Table
+                bottomContent={
+                    pages > 0 ? (
+                        <div className="flex w-full justify-center" style={{direction: "ltr"}}>
+                            <Pagination
+                                isCompact
+                                showControls
+                                showShadow
+
+                                color="primary"
+                                page={page}
+                                total={pages}
+                                onChange={(page) => setPage(page)}
+                            />
+                        </div>
+                    ) : null
+                }
+
+                aria-label="Example table with custom cells">
                 <TableHeader columns={columns}>
                     {(column) => (
                         <TableColumn key={column.uid} className={"text-start"} align={"center"}>
@@ -289,9 +423,9 @@ const TableComponent = () => {
                         </TableColumn>
                     )}
                 </TableHeader>
-                <TableBody items={card}>
+                <TableBody items={cardRequests.data}>
                     {(card: Card) => (
-                        <TableRow key={card.userInfo.name}>
+                        <TableRow key={card.cardRequest.id}>
                             {(columnKey) => <TableCell>{renderCell(card, columnKey)}</TableCell>}
                         </TableRow>
                     )}

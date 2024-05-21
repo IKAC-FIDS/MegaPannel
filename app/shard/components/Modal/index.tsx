@@ -25,7 +25,7 @@ const ModalComponent : React.FC<OpenModalProps> = ({children}:OpenModalProps)=> 
                     {(onClose) => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">
-                          مشخصات
+                                جزئیات
                             </ModalHeader>
                             <ModalBody>
 
