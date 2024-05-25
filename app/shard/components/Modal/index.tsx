@@ -1,19 +1,34 @@
 import React, {ReactNode} from "react";
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalProps, Button, useDisclosure, RadioGroup, Radio} from "@nextui-org/react";
-import { EyeIcon } from "@/app/card/EyeIcon";
-interface OpenModalProps extends ModalProps{
-    children:ReactNode
+import {
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    ModalProps,
+    Button,
+    useDisclosure,
+    RadioGroup,
+    Radio,
+    Tooltip
+} from "@nextui-org/react";
+import {EyeIcon} from "@/app/card/EyeIcon";
+
+interface OpenModalProps extends ModalProps {
+    children: ReactNode
 }
-const ModalComponent : React.FC<OpenModalProps> = ({children}:OpenModalProps)=> {
+
+const ModalComponent: React.FC<OpenModalProps> = ({children}: OpenModalProps) => {
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
     const [scrollBehavior, setScrollBehavior] = React.useState<ModalProps["scrollBehavior"]>("inside");
 
     return (
         <div className="flex flex-col gap-2">
-            <Button isIconOnly onPress={onOpen}>
-                <EyeIcon/>
-            </Button>
-
+            <Tooltip content="جزئیات">
+                <Button isIconOnly onPress={onOpen}>
+                    <EyeIcon/>
+                </Button>
+            </Tooltip>
             <Modal
                 size={"4xl"}
                 backdrop={"blur"}
@@ -29,7 +44,7 @@ const ModalComponent : React.FC<OpenModalProps> = ({children}:OpenModalProps)=> 
                             </ModalHeader>
                             <ModalBody>
 
-                                    {children}
+                                {children}
 
                             </ModalBody>
                             <ModalFooter>

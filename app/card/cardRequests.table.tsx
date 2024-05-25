@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useMemo, useState} from "react";
 import {
     Table,
     TableHeader,
@@ -6,27 +6,24 @@ import {
     TableBody,
     TableRow,
     TableCell,
-    User,
     Chip,
-    Tooltip,
     ChipProps,
-    getKeyValue, Pagination,
+    Pagination,
     Select,
-    SelectItem
+    SelectItem, Divider
 } from "@nextui-org/react";
-import {EditIcon} from "./EditIcon";
-import {DeleteIcon} from "./DeleteIcon";
+
 import {Tabs, Tab, Card, CardBody} from "@nextui-org/react";
 import {columns} from "./data";
-import card from "@/app/card/sample.json"
-
-import ExportToExcel from "@/app/shard/components/ExportToExcel";
-import Button from "@/app/shard/components/Button";
 import Modal from "@/app/shard/components/Modal";
 import {utcToShamsi} from "@/app/shard/utils/utcToShamsi";
 import Input from "@/app/shard/components/Input";
 import axiosInstance from "@/app/configurations/api/axiosInstance";
 import useSWR from "swr";
+import Image from "next/image";
+import SearchIcon from "@/app/shard/assets/icons/searchicon.svg"
+import Print from "@/app/shard/assets/icons/Print.svg"
+import Button from "@/app/shard/components/Button";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     1: "warning",
@@ -115,6 +112,7 @@ const getCardRequests = async (currentPage: number, status: number, filter: stri
     }
 
 }
+
 const checkStatus = (status: number) => {
     return statusList.find(({id}) => id === status)?.label;
 }
@@ -180,8 +178,6 @@ const TableComponent = () => {
     const rowsPerPage = 10;
 
 
-    console.log(cardRequests)
-
     const pages = useMemo(() => {
         return cardRequests?.totalPageCount ? Math.ceil(cardRequests.totalPageCount) : 0;
     }, [cardRequests?.totalPageCount, rowsPerPage]);
@@ -232,9 +228,8 @@ const TableComponent = () => {
             case "actions":
                 return (
                     <div className="relative flex items-center gap-2">
-                        <Tooltip content="مشخصات">
-              <span onClick={() => {
-              }} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+
+                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
           <Modal>
                 <div className="flex w-full flex-col">
       <Tabs aria-label="Options">
@@ -301,20 +296,9 @@ const TableComponent = () => {
         </Tab>
 
       </Tabs>
-    </div>
+                </div>
             </Modal>
               </span>
-                        </Tooltip>
-                        <Tooltip content="Edit user">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                <EditIcon/>
-              </span>
-                        </Tooltip>
-                        <Tooltip color="danger" content="Delete user">
-              <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                <DeleteIcon/>
-              </span>
-                        </Tooltip>
                     </div>
                 );
             default:
@@ -332,81 +316,145 @@ const TableComponent = () => {
         }, 500);
     };
 
-    const topContent = React.useMemo(() => {
+    const bottomContent = React.useMemo(() => {
         return (
-            <div className={"rounded-full w-64 h-12 hidden lg:flex items-center justify-center"}>
-                <Input onChange={handleInputChange} className={"rounded-full"} size={"lg"}
-                       labelPlacement={"outside-left"} placeholder="جستو وجو"/>
+            <div className={'flex justify-between items-center mb-20'}>
+                <div className="flex gap-2 w-full h-10">
+                    {cardRequests?.statusStatistics && Object.entries(cardRequests.statusStatistics).map(([key, value]) => (
+
+                        <>
+                            <div key={key} className={"flex justify-between gap-1 items-center"}>
+                                <div
+                                    className={'font-normal text-zinc-500'}> {checkStatus(Number(key)) + " " + ':'}</div>
+                                <div>{" " + value}</div>
+                            </div>
+                            <Divider orientation="vertical"/></>
+
+                    ))}
+
+                </div>
+                <div className="flex w-full" style={{direction: "ltr"}}>
+                    <Pagination
+                        isCompact
+                        showControls
+                        showShadow
+
+                        color="primary"
+                        page={page}
+                        total={pages}
+                        onChange={(page) => setPage(page)}
+                    />
+                </div>
+
+
             </div>
-        )
-    })
+        );
+    }, [cardRequests?.statusStatistics]);
+    // const topContent = React.useMemo(() => {
+    //     return (
+    //         <>
+    //             <div className={"rounded-full w-64 h-12 hidden lg:flex items-center justify-center"}>
+    //                 <Input onChange={handleInputChange} className={"rounded-full"} size={"lg"}
+    //                        labelPlacement={"outside-left"} placeholder="جستو وجو"/>
+    //             </div>
+    //             <div>
+    //                 { Object.entries(cardRequests.statusStatistics).forEach(([key, value]) => {
+    //                             return(<>       <Chip
+    //
+    //                                 variant="flat">
+    //                                 {
+    //                                     checkStatus(key)
+    //                                 }
+    //
+    //                             </Chip></>)
+    //
+    //                 });}
+    //             </div>
+    //         </>
+    //
+    //
+    //     )
+    // })
 
 
     if (!cardRequests) return (<p>loading</p>)
 
     return (
         <>
+            <div className={'overflow-y-auto'}>
+                <div className={"font-black text-3xl mb-7"}>لیست کارت های نقدی</div>
+                <div className="flex h-5 items-center space-x-4 text-small mb-8 bg-white p-8 rounded-xl drop-shadow-lg">
 
-            <Table
-                topContent={topContent}
-                bottomContent={
-                    pages > 0 ? (
-                        <div className="flex w-full justify-center" style={{direction: "ltr"}}>
-                            <Pagination
-                                isCompact
-                                showControls
-                                showShadow
+                    <div className={'ml-4'}>
+                        <Image src={SearchIcon.src} alt={"search"} width={24} height={24}/>
+                    </div>
 
-                                color="primary"
-                                page={page}
-                                total={pages}
-                                onChange={(page) => setPage(page)}
-                            />
-                        </div>
-                    ) : null
-                }
+                    <Divider orientation="vertical"/>
 
-                aria-label="Example table with custom cells">
-                <TableHeader columns={columns}>
-                    {(column) => (
+                    <div><Button variant={'light'}>دریافت فایل اکسل</Button></div>
 
+                    <Divider orientation="vertical"/>
 
-                        <TableColumn key={column.uid} className={"text-start"} align={"center"}>
-                            <div className={"flex items-center"}>
-                                {column.uid === "status" ?
-                                    <>وضعیت: <Select
+                    <div className={'flex gap-3'}>
+                        <Image src={Print.src} alt={"search"} width={24} height={24}/>
+                        <Button variant={'light'}>تایید چاپ</Button>
+                    </div>
 
-                                        className="w-40"
-                                        defaultSelectedKeys={[0]}
+                </div>
+                <Table
 
-                                    >
-                                        {statusList.map((item) => (
-                                            <SelectItem key={item.id} value={selectedStatus}
-                                                        onClick={() => {
-                                                            setSelectedStatus(item.id)
-                                                            setPage(1)
-                                                        }}>
-                                                {item.label}
-                                            </SelectItem>
-                                        ))}
-                                    </Select> </> : column.name}
-                            </div>
-                        </TableColumn>
+                    bottomContent={
+                        pages > 0 ? bottomContent : null
+                    }
 
-                    )}
-                </TableHeader>
-
-                <TableBody items={cardRequests.data}>
-                    {(card: Card) => (
-                        <TableRow key={card.cardRequest.id}>
-                            {(columnKey) => <TableCell>{renderCell(card, columnKey)}</TableCell>}
-                        </TableRow>
-                    )}
-                </TableBody>
-
-            </Table>
+                    aria-label="Example table with custom cells">
+                    <TableHeader columns={columns}>
+                        {(column) => (
 
 
+                            <TableColumn key={column.uid} className={"text-start"} align={"center"}>
+                                <div className={"flex items-center"}>
+                                    {column.uid === "status" ?
+                                        <>وضعیت: <Select
+
+                                            className="w-40"
+                                            defaultSelectedKeys={[0]}
+
+                                        >
+                                            {statusList.map((item) => (
+                                                <SelectItem key={item.id} value={selectedStatus}
+                                                            onClick={() => {
+                                                                setSelectedStatus(item.id)
+                                                                setPage(1)
+                                                            }}>
+                                                    {item.label}
+                                                </SelectItem>
+                                            ))}
+                                        </Select> </> : column.name}
+                                </div>
+                            </TableColumn>
+
+                        )}
+                    </TableHeader>
+
+                    <TableBody items={cardRequests.data}>
+                        {(card: Card) => (
+                            <TableRow key={card.cardRequest.id}>
+                                {(columnKey) => <TableCell>{renderCell(card, columnKey)}</TableCell>}
+                            </TableRow>
+                        )}
+                    </TableBody>
+
+                </Table>
+
+                {/*<div className={'my-20'}>*/}
+
+                {/*    <StatusConverter/>*/}
+
+
+                {/*</div>*/}
+
+            </div>
         </>
 
 

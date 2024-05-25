@@ -4,23 +4,26 @@ import Status from "@/app/shard/components/Status";
 import AnalyticCard from "../shard/components/AnalyticCard";
 import TotalCard from "@/app/shard/components/TotalCard";
 import InputComponent from "@/app/shard/components/Input";
+
 const AdminHomePage = () => {
-    const statusExample= 'Completed'
-    return(
+    const statusExample = 'Completed'
+    return (
         <>
             <div>
 
-            <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
 
-              <div className={'mb-2'}>
-                  <Button  variant={"bordered"}  color={"primary"} onClick={()=>{
-                      console.log("onClick is don")
-                  }}>
-                      click
-                  </Button>
-              </div>
-               <Status color={statusExample==="Completed"?"danger":"primary"} className={'mb-8'} variant={"flat"}>Completed</Status>
+                <div className={'mb-2'}>
+                    <Button variant={"bordered"} color={"primary"} onClick={() => {
+                        console.log("onClick is don")
+                    }}>
+                        click
+                    </Button>
+                </div>
+                <Status color={statusExample === "Completed" ? "danger" : "primary"} className={'mb-8'}
+                        variant={"flat"}>Completed</Status>
                 {/*<AnalyticCard/>*/}
+                <Status>lasdk;ls</Status>
                 <TotalCard/>
                 <TotalCard/>
                 <TotalCard/>

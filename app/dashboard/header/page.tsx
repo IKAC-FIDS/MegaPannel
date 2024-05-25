@@ -5,6 +5,7 @@ import BankDashIcon from "@/app/dashboard/shard/assets/icons/bankdash.svg";
 import Notification from "@/app/shard/assets/icons/notification.svg";
 import Person from "@/app/shard/assets/icons/person.svg";
 import Settings from "@/app/shard/assets/icons/settings.svg";
+import Logo from "@/app/shard/assets/icons/logo.svg";
 import SearchIcon from "@/app/shard/assets/icons/searchicon.svg";
 import React, {useEffect, useState} from "react";
 import {
@@ -14,13 +15,15 @@ import {
     NavbarItem,
     NavbarMenuToggle,
     NavbarMenu,
-    NavbarMenuItem
+    NavbarMenuItem, Badge, Select, SelectItem
 } from "@nextui-org/react";
 
 import {usePathname} from "next/navigation";
 import Link from "next/link";
 import Input from "@/app/shard/components/Input";
-import sideTabs from "@/app/sideTabs";
+import sideTabs, {dashboards, dashProps} from "@/app/sideTabs";
+import Button from "@/app/shard/components/Button";
+
 
 const Header = () => {
 
@@ -32,101 +35,108 @@ const Header = () => {
 
     return (
         <>
-            <Navbar onMenuOpenChange={setIsMenuOpen} isMenuOpen={isMenuOpen} className={"h-20"} maxWidth={"full"}>
+            <Navbar onMenuOpenChange={setIsMenuOpen} isMenuOpen={isMenuOpen} className={"h-20"}
+                    maxWidth={"full"}>
 
                 <NavbarMenuToggle
                     aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                     className="sm:hidden"
 
                 />
-                <NavbarContent className={"max-w-full"}>
-                    <NavbarItem className={"w-2/12"}>
-                        <div className=" items-center gap-4 hidden lg:flex">
-                            <Image
-                                src={BankDashIcon.src}
-                                alt={"dashboard Logo"}
-                                width={36}
-                                height={36}
-                            />
-                            <h1>BankDash</h1>
-                        </div>
-                    </NavbarItem>
-                    <NavbarItem className={"w-full "}>
-                        <div className={"flex items-center justify-between w-full"}>
+                <NavbarContent className={"max-w-2/12 "}>
 
-
-                            <div className={" w-full flex flex-col items-center justify-between"}>
-                                <div className={"flex justify-between items-center w-full sm:justify-start"}>
-                                    <h1 className="font-bold text-lg mx-auto sm:mx-0">{endUrl}</h1>
-
-                                    <div className={"sm:hidden flex mx-auto sm:mx-0"}>
-                                        <Image
-                                            src={Person.src}
-                                            alt={"dashboard Logo"}
-                                            width={35}
-                                            height={35}
-                                        />
-                                    </div>
-                                </div>
-
-
-                            </div>
-
-
-                        </div>
-
-                    </NavbarItem>
-                </NavbarContent>
-
-
-                <NavbarContent className="hidden sm:flex gap-10" justify="center">
-                    {/*<NavbarItem>*/}
-                    {/*    <div className={"rounded-full w-64 h-12 hidden lg:flex items-center justify-center"}>*/}
-                    {/*        <Input size={"lg"} labelPlacement={"outside-left"} placeholder="جستو وجو"/>*/}
-                    {/*    </div>*/}
-                    {/*</NavbarItem>*/}
-                    <NavbarItem>
-                        <div
-                            className={"w-9 bg-gray-200 hidden lg:flex justify-center items-center rounded-full p-1"}>
-                            <Image
-                                src={Settings.src}
-                                alt={"dashboard Logo"}
-                                width={26}
-                                height={26}
-                            />
-                        </div>
-                    </NavbarItem>
+                    <NavbarItem className={'ml-56'}> <Image src={Logo.src} alt={"Notification"} width={70}
+                                                            height={13.66}/></NavbarItem>
 
                     <NavbarItem>
+                        <Badge content="6" shape="circle" color="danger">
+                            <Button
+                                radius="full"
+                                isIconOnly
+                                aria-label="more than 99 notifications"
+                                variant="light"
+                            >
+                                <Image src={Notification.src} alt={"Notification"} width={24} height={25}/>
+                            </Button>
+                        </Badge>
+                    </NavbarItem>
+                    <NavbarItem className={"flex"}>
+                        <Image src={Person.src} alt={"person"} width={44} height={44}/>
 
-                        <div
-                            className={
-                                "w-9  bg-gray-200 hidden lg:flex justify-center items-center rounded-full p-1"
-                            }
+                    </NavbarItem>
+                    <NavbarItem>
+                        <div>سارا حسینی</div>
+                        <div>کارشناس امور مشتریان</div>
+                    </NavbarItem>
+                    <NavbarItem className={"w-60 mr-auto"}>
+                        <Select
+                            items={dashboards}
+                            label="انتخاب پنل"
+                            color={"primary"}
+                            defaultSelectedKeys={[dashboards.find((dashboard) => {
+                                return dashboard.route.includes(pathName.split("/")[1])
+                            })?.route]}
                         >
-                            <Image
-                                src={Notification.src}
-                                alt={"dashboard Logo"}
-                                width={26}
-                                height={26}
-                            />
-                        </div>
+                            {(dashboard: dashProps) =>
 
-                    </NavbarItem>
-                    <NavbarItem>
-
-
-                        <div>
-                            <Image
-                                src={Person.src}
-                                alt={"dashboard Logo"}
-                                width={50}
-                                height={50}
-                            />
-                        </div>
-
+                                <SelectItem
+                                    key={dashboard.route}
+                                    href={dashboard.route}
+                                    value={dashboard.label}>
+                                    {dashboard.label}
+                                </SelectItem>
+                              
+                            }
+                        </Select>
                     </NavbarItem>
                 </NavbarContent>
+                {/*<NavbarContent>*/}
+                {/* */}
+                {/*</NavbarContent>*/}
+
+                {/*<NavbarContent className="hidden sm:flex gap-10" justify="center">*/}
+                {/*    <NavbarItem>*/}
+                {/*        <div*/}
+                {/*            className={"w-9 bg-gray-200 hidden lg:flex justify-center items-center rounded-full p-1"}>*/}
+                {/*            <Image*/}
+                {/*                src={Settings.src}*/}
+                {/*                alt={"dashboard Logo"}*/}
+                {/*                width={26}*/}
+                {/*                height={26}*/}
+                {/*            />*/}
+                {/*        </div>*/}
+                {/*    </NavbarItem>*/}
+
+                {/*    <NavbarItem>*/}
+
+                {/*        <div*/}
+                {/*            className={*/}
+                {/*                "w-9  bg-gray-200 hidden lg:flex justify-center items-center rounded-full p-1"*/}
+                {/*            }*/}
+                {/*        >*/}
+                {/*            <Image*/}
+                {/*                src={Notification.src}*/}
+                {/*                alt={"dashboard Logo"}*/}
+                {/*                width={26}*/}
+                {/*                height={26}*/}
+                {/*            />*/}
+                {/*        </div>*/}
+
+                {/*    </NavbarItem>*/}
+                {/*    <NavbarItem>*/}
+
+
+                {/*        <div>*/}
+                {/*            <Image*/}
+                {/*                src={Person.src}*/}
+                {/*                alt={"dashboard Logo"}*/}
+                {/*                width={50}*/}
+                {/*                height={50}*/}
+                {/*            />*/}
+                {/*        </div>*/}
+
+                {/*    </NavbarItem>*/}
+                {/*</NavbarContent>*/}
 
                 <NavbarMenu className={'pt-10'}>
                     {sideTabs(pathName.split("/")[1]).map((item, index) => (
