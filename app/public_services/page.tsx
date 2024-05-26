@@ -6,6 +6,7 @@ import axiosInstance from "../configurations/api/axiosInstance";
 import useSWR from "swr";
 import { useState } from "react";
 import SelectBox from "./component/select";
+import { colors } from "@/app/configurations/theme/colors";
 
 interface ResultItem {
   name: string;
@@ -76,6 +77,43 @@ const Page = () => {
     isLoading: isLoading2,
   } = useSWR("/api/internet", getInternetPackage);
 
+  const firstInternetLabel = [
+    {
+      text: "مبلغ  خالص",
+      backgroundColor: colors.turquoise[400],
+    },
+    {
+      text: "مبلغ با احتساب مالیات",
+      backgroundColor: colors.blue[800],
+    },
+  ];
+
+  const secondInternetLabel = [
+    {
+      text: " تعداد خرید ",
+      backgroundColor: colors.blue[800],
+    },
+    {
+      text: "مبلغ با احتساب مالیات",
+      backgroundColor: "white",
+      textcolor: "white",
+    },
+  ];
+
+  const firstChargeLabel = [
+    {
+      text: "مبلغ  خالص",
+      backgroundColor: colors.blue[800],
+    },
+  ];
+
+  const secondChargeLabel = [
+    {
+      text: " تعداد خرید ",
+      backgroundColor: colors.blue[800],
+    },
+  ];
+
   const {
     data: billsData,
     error: billsError,
@@ -83,7 +121,8 @@ const Page = () => {
   } = useSWR("/api/bills", getbills);
 
   const transformBarChartChargeInternet = (
-    internetData: InternetChargeData | null
+    internetData: InternetChargeData | null,
+    showBased: string
   ): (string | number)[][] => {
     if (!internetData)
       return [["Company", "Original Amount", "Tax Included Amount"]];
@@ -115,7 +154,7 @@ const Page = () => {
       ["Company", "Total Purchase", "Count"],
     ];
     data.results.forEach((item) => {
-      if (showresult === "0") {
+      if (showBased === "0") {
         transformed.push([item.name, item.count, 0]);
       } else {
         transformed.push([item.name, item.totalPurchase, 0]);
@@ -135,61 +174,49 @@ const Page = () => {
 
   const pieChartData = transformPieChartBills(billsData);
 
-  const barChartDataInternet = transformBarChartChargeInternet(internet);
+  const barChartDataInternet = transformBarChartChargeInternet(
+    internet,
+    showresult
+  );
   const barChartDataCharge = transformBarChartCharge(charge);
-  const data = [
-    { label: "تعداد", value: 0 },
-    { label: "مبلغ ", value: 1 },
-  ];
 
   return (
     <div className="flex justify-center items-center h-screen flex-col w-full ">
-      <div className="w-full pl-8">
-        <SelectBox
+      <div className="flex  w-full flex-col  md:flex-row p-20">
+        {isLoading2 && <div>Loading...</div>}
+        {errorenternet && <div>Error loading data</div>}
+        {!isLoading2 && !errorenternet && (
+          <BarChart
+            onChange={(e) => {
+              const value = e.target.value;
+              setShowresult(value);
+            }}
+            label={
+              showresult === "0" ? secondInternetLabel : firstInternetLabel
+            }
+            title="بسته اینترنت"
+            data={barChartDataInternet}
+          />
+        )}
+
+        {isLoading6 && <div>Loading...</div>}
+        {billsError && <div>Error loading data</div>}
+        {!isLoading6 && !billsError && <PieChart data={pieChartData} />}
+        {/* </div> */}
+      </div>
+      {isLoading6 && <div>Loading...</div>}
+      {chargeerror && <div>Error loading data</div>}
+      {!isLoading6 && !chargeerror && (
+        <BarChart
           onChange={(e) => {
             const value = e.target.value;
             setShowBase(value);
           }}
-          show={data}
-          label="نمایش بر اساس"
+          label={showBased === "0" ? secondChargeLabel : firstInternetLabel}
+          title="شارژ"
+          data={barChartDataCharge}
         />
-      </div>
-
-      <div className="flex flex-col mb-8 md:flex-row">
-        <div className="w-full md:w-1/2 justify-center md:justify-start">
-          {isLoading2 && <div>Loading...</div>}
-          {errorenternet && <div>Error loading data</div>}
-          {!isLoading2 && !errorenternet && (
-            <BarChart title="by" data={barChartDataInternet} />
-          )}
-        </div>
-        <div
-          style={{ marginRight: "20%" }}
-          className="w-full md:w-1/2 justify-center md:justify-end"
-        >
-          {isLoading6 && <div>Loading...</div>}
-          {billsError && <div>Error loading data</div>}
-          {!isLoading6 && !billsError && <PieChart data={pieChartData} />}
-        </div>
-      </div>
-      <div>
-        <div className="w-full pl-8">
-          <SelectBox
-            onChange={(e) => {
-              const value = e.target.value;
-              // setShowBase(value);
-              setShowresult(value);
-            }}
-            show={data}
-            label="نمایش بر اساس"
-          />
-        </div>
-        {isLoading6 && <div>Loading...</div>}
-        {chargeerror && <div>Error loading data</div>}
-        {!isLoading6 && !chargeerror && (
-          <BarChart title="by" data={barChartDataCharge} />
-        )}
-      </div>
+      )}
       <div style={{ height: "100px", width: "100%" }}></div>
     </div>
   );
