@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useMemo, useState} from "react";
 import {
     Table,
     TableHeader,
@@ -6,30 +6,33 @@ import {
     TableBody,
     TableRow,
     TableCell,
-    User,
     Chip,
-    Tooltip,
     ChipProps,
-    getKeyValue
+    Pagination,
+    Select,
+    SelectItem, Divider
 } from "@nextui-org/react";
-import {EditIcon} from "./EditIcon";
-import {DeleteIcon} from "./DeleteIcon";
+
 import {Tabs, Tab, Card, CardBody} from "@nextui-org/react";
 import {columns} from "./data";
-import card from "@/app/card/sample.json"
-
-import ExportToExcel from "@/app/shard/components/ExportToExcel";
-import Button from "@/app/shard/components/Button";
 import Modal from "@/app/shard/components/Modal";
 import {utcToShamsi} from "@/app/shard/utils/utcToShamsi";
 import Input from "@/app/shard/components/Input";
+import axiosInstance from "@/app/configurations/api/axiosInstance";
+import useSWR from "swr";
+import Image from "next/image";
+import SearchIcon from "@/app/shard/assets/icons/searchicon.svg"
+import Print from "@/app/shard/assets/icons/Print.svg"
+import Button from "@/app/shard/components/Button";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
-    1: "success",
-    2: "danger",
-    4: "warning",
+    1: "warning",
+    2: "secondary",
+    3: "danger",
+    4: "primary",
+    5: "success",
+    7: "default"
 };
-
 
 interface Card {
     cardRequest: CardRequest;
@@ -98,109 +101,204 @@ interface CardRequest {
 }
 
 
+const getCardRequests = async (currentPage: number, status: number, filter: string) => {
+    const statusCode = status ? `&status=${status}` : ""
+
+    const response = await axiosInstance.get(
+        `http://192.168.106.7:7040/api/card-requests?currentPage=${currentPage}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
+    );
+    if (response.status === 200) {
+        return response.data
+    }
+
+}
+
+const checkStatus = (status: number) => {
+    return statusList.find(({id}) => id === status)?.label;
+}
+
+const checkNull = (value: string | number) => {
+
+    if (value) return value
+
+    return "نامشخص"
+
+}
+
+const statusList = [
+    {
+        id: 0,
+        label: "همه"
+
+    }
+    , {
+        id: 1,
+        label: "در انتظار صدور"
+    },
+    {
+        id: 2,
+        label: "صادر شده"
+    },
+    {
+        id: 3,
+        label: "ناموفق"
+    }, {
+        id: 4,
+        label: "چاپ شده"
+    }, {
+        id: 5,
+        label: "فعال"
+    },
+    {
+        id: 6,
+        label: "نامشخص"
+    },
+    {
+        id: 7,
+        label: "خطا در عملیات"
+    },
+
+]
+
+
 const TableComponent = () => {
+
+    const [selectedStatus, setSelectedStatus] = useState<number>(0)
+    const [filter, setFilter] = useState<string>("")
+    const [page, setPage] = React.useState(1);
+    let typingTimeout: NodeJS.Timeout | null = null;
+
+    const {
+        data: cardRequests,
+        isValidating,
+        isLoading
+    } = useSWR(`http://192.168.106.7:7040/api/card-requests?page=${page}&status=${selectedStatus}&filter=${filter}`
+        , async () => await getCardRequests(page, selectedStatus, filter), {keepPreviousData: true,});
+
+    const rowsPerPage = 10;
+
+
+    const pages = useMemo(() => {
+        return cardRequests?.totalPageCount ? Math.ceil(cardRequests.totalPageCount) : 0;
+    }, [cardRequests?.totalPageCount, rowsPerPage]);
 
 
     const renderCell = React.useCallback((card: Card, columnKey: React.Key) => {
+
         const cellValue = card[columnKey as keyof Card];
 
         switch (columnKey) {
+
             case "date":
                 return (
-                    <div>{utcToShamsi(card.cardInfo.expireDateUtc)}</div>
+                    <div>{utcToShamsi(card.cardRequest?.createdDateUtc)}</div>
                 )
             case "name":
                 return (
                     <div className={'flex gap-1'}>
-                        <p>{card.userInfo.name}</p>
-                        <p>{card.userInfo.lastName}</p>
+
+                        <p>{checkNull(card.userInfo?.name)}</p>
+                        <p>{checkNull(card.userInfo?.lastName)}</p>
                     </div>
                 );
             case "nationalCode":
                 return (
                     <div className="flex flex-col">
-                        <p className="text-bold text-sm capitalize">{card.userInfo.nationalCode}</p>
+                        <p>{checkNull(card.userInfo?.nationalCode)}</p>
                     </div>
                 );
             case "phoneNumber":
                 return (
                     <div>
-                        {card.userInfo.phoneNumber}
+                        {checkNull(card.userInfo?.phoneNumber)}
                     </div>
                 )
             case "status":
                 return (
-                    <Chip className="capitalize" color={statusColorMap[card.cardRequest.status]} size="sm"
-                          variant="flat">
-                        {card.cardRequest.status}
+                    <Chip
+                        className={`capitalize ${card.cardRequest?.status && card.cardRequest?.status === 6 ? `bg-red-600 text-red-200` : ""}`}
+                        color={statusColorMap[card.cardRequest.status]} size="sm"
+                        variant="flat">
+                        {
+                            checkStatus(card.cardRequest?.status)
+                        }
+
                     </Chip>
                 );
             case "actions":
                 return (
                     <div className="relative flex items-center gap-2">
-                        <Tooltip content="Details">
-              <span onClick={() => {
 
-
-              }} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
           <Modal>
                 <div className="flex w-full flex-col">
       <Tabs aria-label="Options">
         <Tab key="photos" title="مشخصات کاربر">
-          <Card>
+          <Card className={" min-h-80"}>
             <CardBody>
                 <div className={"flex gap-5 mb-3"}>
 
-             <Input labelPlacement={"outside"} label="نام و نام خانوادگی" isDisabled
-                    defaultValue={card.userInfo.name + " " + card.userInfo.lastName} labelPlacement="outside"/>
+             <Input size={"lg"} labelPlacement={"outside"} label="نام و نام خانوادگی" isDisabled
+                    defaultValue={
+                        checkNull(card.userInfo?.name + " " + card.userInfo?.lastName)
+
+                    } labelPlacement="outside" placeholder={""}/>
 
              <Input labelPlacement={"outside"} label="کد ملی" isDisabled
-                    defaultValue={card.userInfo.nationalCode}/>
+                    defaultValue={checkNull(card.userInfo?.nationalCode)}/>
 
                 </div>
 
                 <div className={"flex gap-5"}>
 
              <Input labelPlacement={"outside"} label="تاریخ تولد" isDisabled
-                    defaultValue={card.userInfo.birthdate}/>
+                    defaultValue={checkNull(card.userInfo?.birthdate)}/>
 
-             <Input labelPlacement={"outside"} label="تلفن همراه" isDisabled
-                    defaultValue={card.userInfo.phoneNumber}/>
+             <Input isDisabled
+                    type="text"
+                    label="تلفن همراه"
+                    placeholder="you@example.com"
+                    labelPlacement="outside" defaultValue={checkNull(card.userInfo?.phoneNumber)}/>
 
                 </div>
 
             </CardBody>
           </Card>
         </Tab>
-        <Tab key="music" title="Music">
-          <Card>
+        <Tab key="cardInfo" title="اطلاعات کارت">
+          <Card className={"min-h-80"}>
             <CardBody>
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              <div className={"flex gap-5 mb-3"}>
+
+             <Input labelPlacement={"outside"} label="شماره کارت" isDisabled
+                    defaultValue={checkNull(card.cardRequest?.cardNumber)} labelPlacement="outside"/>
+
+             <Input labelPlacement={"outside"} label="شماره حساب" isDisabled
+                    defaultValue={checkNull(card.cardInfo?.accountNumber)}/>
+
+                </div>
+
+                <div className={"flex gap-5 mb-3"}>
+
+                 <Input labelPlacement={"outside"} label="تاریخ افتتاح حساب" isDisabled
+                        defaultValue={utcToShamsi(card.cardRequest?.createdDateUtc)}/>
+
+                  <Input labelPlacement={"outside"} label="تاریخ انقضا" isDisabled
+                         defaultValue={utcToShamsi(card.cardInfo?.bankTypeExpireDate)}/>
+                </div>
+                   <div>
+                        <div className={"text-Indigo-600 w-full text-start mb-3"}>آدرس</div>
+                        <div
+                            className={"bg-Indigo-700 text-Indigo-600 p-6 rounded-xl text-start"}>{checkNull(card.cardRequest?.address)}</div>
+                    </div>
             </CardBody>
           </Card>
         </Tab>
-        <Tab key="videos" title="Videos">
-          <Card>
-            <CardBody>
-              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </CardBody>
-          </Card>
-        </Tab>
+
       </Tabs>
-    </div>
+                </div>
             </Modal>
               </span>
-                        </Tooltip>
-                        <Tooltip content="Edit user">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                <EditIcon/>
-              </span>
-                        </Tooltip>
-                        <Tooltip color="danger" content="Delete user">
-              <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                <DeleteIcon/>
-              </span>
-                        </Tooltip>
                     </div>
                 );
             default:
@@ -208,62 +306,155 @@ const TableComponent = () => {
         }
     }, []);
 
-    const [test, setTest] = useState<boolean>(false)
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (typingTimeout) {
+            clearTimeout(typingTimeout);
+        }
+        typingTimeout = setTimeout(() => {
+            if (value.length >= 3 || !value.length) setFilter(value)
+        }, 500);
+    };
 
-    // const FilteredColumn=(array:[],options:{})=>{
-    //     const FilteredColumn = array.map(item => {
-    //         const { options, ...rest } = item; // Using object destructuring to exclude 'avatar' property
-    //         return rest;
-    //     });
-    // }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    const bottomContent = React.useMemo(() => {
+        return (
+            <div className={'flex justify-between items-center mb-20'}>
+                <div className="flex gap-2 w-full h-10">
+                    {cardRequests?.statusStatistics && Object.entries(cardRequests.statusStatistics).map(([key, value]) => (
 
-    // const FilteredColumn = card.map(item => {
-    //     const { gender, ...rest } = item.userInfo.gender; // Using object destructuring to exclude 'avatar' property
-    //     return rest;
-    // });
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //     this is for obtional key
-    // let obj = {foo: 1, bar: 2, baz: 3}
-    // function removeProperty(obj, propertyName) {
-    //     let { [propertyName]: _, ...result } = obj
-    //     return result
-    // }
-    // console.log(removeProperty(obj, 'foo'));
-    // {
-    //     "bar": 2,
-    //     "baz": 3
-    // }
+                        <>
+                            <div key={key} className={"flex justify-between gap-1 items-center"}>
+                                <div
+                                    className={'font-normal text-zinc-500'}> {checkStatus(Number(key)) + " " + ':'}</div>
+                                <div>{" " + value}</div>
+                            </div>
+                            <Divider orientation="vertical"/></>
 
-    //////////////////////////////////////////////////
-    const [cardInfo, setCardInfo] = useState<boolean | undefined>(true);
-// const getCardInfo=()=>{
-//     card.map((item)=>{
-//         setCardInfo(item)
-//     })
-// }
+                    ))}
+
+                </div>
+                <div className="flex w-full" style={{direction: "ltr"}}>
+                    <Pagination
+                        isCompact
+                        showControls
+                        showShadow
+
+                        color="primary"
+                        page={page}
+                        total={pages}
+                        onChange={(page) => setPage(page)}
+                    />
+                </div>
+
+
+            </div>
+        );
+    }, [cardRequests?.statusStatistics]);
+    // const topContent = React.useMemo(() => {
+    //     return (
+    //         <>
+    //             <div className={"rounded-full w-64 h-12 hidden lg:flex items-center justify-center"}>
+    //                 <Input onChange={handleInputChange} className={"rounded-full"} size={"lg"}
+    //                        labelPlacement={"outside-left"} placeholder="جستو وجو"/>
+    //             </div>
+    //             <div>
+    //                 { Object.entries(cardRequests.statusStatistics).forEach(([key, value]) => {
+    //                             return(<>       <Chip
+    //
+    //                                 variant="flat">
+    //                                 {
+    //                                     checkStatus(key)
+    //                                 }
+    //
+    //                             </Chip></>)
+    //
+    //                 });}
+    //             </div>
+    //         </>
+    //
+    //
+    //     )
+    // })
+
+
+    if (!cardRequests) return (<p>loading</p>)
+
     return (
         <>
-            <Table aria-label="Example table with custom cells">
-                <TableHeader columns={columns}>
-                    {(column) => (
-                        <TableColumn key={column.uid} className={"text-start"} align={"center"}>
-                            {column.name}
-                        </TableColumn>
-                    )}
-                </TableHeader>
-                <TableBody items={card}>
-                    {(card: Card) => (
-                        <TableRow key={card.userInfo.name}>
-                            {(columnKey) => <TableCell>{renderCell(card, columnKey)}</TableCell>}
-                        </TableRow>
-                    )}
-                </TableBody>
+            <div className={'overflow-y-auto'}>
+                <div className={"font-black text-3xl mb-7"}>لیست کارت های نقدی</div>
+                <div className="flex h-5 items-center space-x-4 text-small mb-8 bg-white p-8 rounded-xl drop-shadow-lg">
 
-            </Table>
+                    <div className={'ml-4'}>
+                        <Image src={SearchIcon.src} alt={"search"} width={24} height={24}/>
+                    </div>
 
-            {/*<ExportToExcel apiData={FilteredColumn} fileName={'filtershode'}/>*/}
+                    <Divider orientation="vertical"/>
 
+                    <div><Button variant={'light'}>دریافت فایل اکسل</Button></div>
+
+                    <Divider orientation="vertical"/>
+
+                    <div className={'flex gap-3'}>
+                        <Image src={Print.src} alt={"search"} width={24} height={24}/>
+                        <Button variant={'light'}>تایید چاپ</Button>
+                    </div>
+
+                </div>
+                <Table
+
+                    bottomContent={
+                        pages > 0 ? bottomContent : null
+                    }
+
+                    aria-label="Example table with custom cells">
+                    <TableHeader columns={columns}>
+                        {(column) => (
+
+
+                            <TableColumn key={column.uid} className={"text-start"} align={"center"}>
+                                <div className={"flex items-center"}>
+                                    {column.uid === "status" ?
+                                        <>وضعیت: <Select
+
+                                            className="w-40"
+                                            defaultSelectedKeys={[0]}
+
+                                        >
+                                            {statusList.map((item) => (
+                                                <SelectItem key={item.id} value={selectedStatus}
+                                                            onClick={() => {
+                                                                setSelectedStatus(item.id)
+                                                                setPage(1)
+                                                            }}>
+                                                    {item.label}
+                                                </SelectItem>
+                                            ))}
+                                        </Select> </> : column.name}
+                                </div>
+                            </TableColumn>
+
+                        )}
+                    </TableHeader>
+
+                    <TableBody items={cardRequests.data}>
+                        {(card: Card) => (
+                            <TableRow key={card.cardRequest.id}>
+                                {(columnKey) => <TableCell>{renderCell(card, columnKey)}</TableCell>}
+                            </TableRow>
+                        )}
+                    </TableBody>
+
+                </Table>
+
+                {/*<div className={'my-20'}>*/}
+
+                {/*    <StatusConverter/>*/}
+
+
+                {/*</div>*/}
+
+            </div>
         </>
 
 
