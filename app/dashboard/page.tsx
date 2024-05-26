@@ -1,9 +1,8 @@
 'use client'
 import Button from "@/app/shard/components/Button";
 import Status from "@/app/shard/components/Status";
-import AnalyticCard from "../shard/components/AnalyticCard";
 import TotalCard from "@/app/shard/components/TotalCard";
-import InputComponent from "@/app/shard/components/Input";
+
 
 const AdminHomePage = () => {
     const statusExample = 'Completed'

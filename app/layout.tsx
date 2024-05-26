@@ -2,8 +2,8 @@
 
 import "./globals.css";
 import {usePathname} from 'next/navigation'
-import Header from "@/app/dashboard/header/page";
-import Sidebar from "@/app/dashboard/sidebar/page";
+import Navbar from "@/app/navbar/page"
+import Sidebar from "@/app/sidebar/page";
 
 import localFont from "@next/font/local";
 
@@ -42,7 +42,7 @@ export default function RootLayout({
         <body style={{direction: "rtl"}}>
         {pathName.endsWith('/') ? children :
             <div>
-                <Header/>
+                <Navbar/>
                 <main className={"flex relative"}>
                     <div className={"fixed right-0 w-1/6"}><Sidebar/></div>
                     <div style={{background: "#f5f5f5", height: "100vh"}}

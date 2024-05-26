@@ -3,7 +3,7 @@
 import Image from "next/image";
 import BankDashIcon from "@/app/dashboard/shard/assets/icons/bankdash.svg";
 import Notification from "@/app/shard/assets/icons/notification.svg";
-import Person from "@/app/shard/assets/icons/person.svg";
+import Person from "@/app/navbar/assets/images/person.svg";
 import Settings from "@/app/shard/assets/icons/settings.svg";
 import Logo from "@/app/shard/assets/icons/logo.svg";
 import SearchIcon from "@/app/shard/assets/icons/searchicon.svg";
@@ -85,7 +85,7 @@ const Header = () => {
                                     value={dashboard.label}>
                                     {dashboard.label}
                                 </SelectItem>
-                              
+
                             }
                         </Select>
                     </NavbarItem>
