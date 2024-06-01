@@ -46,7 +46,7 @@ export default function RootLayout({
                 <main className={"flex relative"}>
                     <div className={"fixed right-0 w-1/6"}><Sidebar/></div>
                     <div style={{background: "#f5f5f5", height: "100vh"}}
-                         className={"fixed left-0 w-full lg:w-10/12 scrollbar-thin overflow-y-auto "}>{children}</div>
+                         className={"fixed left-0 w-full lg:w-10/12 scrollbar-thin overflow-y-scroll"}>{children}</div>
                 </main>
             </div>}
 

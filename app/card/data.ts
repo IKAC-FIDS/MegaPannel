@@ -1,11 +1,13 @@
 import React from "react";
 
 const columns = [
-    {name: "تاریخ درخواست", uid: "date"},
-    {name: "نام", uid: "name"},
-    {name: "کد ملی", uid: "nationalCode"},
-    {name: "شماره موبایل", uid: "phoneNumber"},
     {name: "وضعیت", uid: "status"},
+    {name: "تاریخ درخواست", uid: "date"},
+    {name: "نام و نام خانوادگی", uid: "name"},
+    {name: "کد ملی", uid: "nationalCode"},
+    {name: "موبایل", uid: "phoneNumber"},
+    {name: "شماره کارت", uid: "cardNumber"},
+    {name: "کد رهگیری", uid: "postNumber"},
     {name: "جزئیات", uid: "actions"},
 ];
 
