@@ -296,17 +296,17 @@ const dashboard = [
 
 export const dashboards = [
     {
-        label: "پنل مدیریت کارت ها",
+        label: "مدیریت کارت ها",
         route: "/card"
     },
     {
-        label: "پنل آمار",
+        label: "سرویس ها",
         route: "/public_services"
     },
-    {
-        label: "داشبورد",
-        route: "dashboard"
-    }
+    // {
+    //     label: "داشبورد",
+    //     route: "dashboard"
+    // }
 ]
 
 export default sideTabs;
