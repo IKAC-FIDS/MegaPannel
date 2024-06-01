@@ -3,7 +3,7 @@ import {Input} from "@nextui-org/input";
 interface InputProps extends InputVariantProps{
 
 }
-const InputComponent:React.FC<InputProps> = ({...props} ,placeholder:InputProps) => {
+const InputComponent:React.FC<InputProps> = ({...props} :InputProps) => {
   return(
 
       // <>
@@ -19,7 +19,7 @@ const InputComponent:React.FC<InputProps> = ({...props} ,placeholder:InputProps)
           {/*<Input type {...props}/>*/}
           <div className={'flex text-start w-full h-auto'}>
 
-              <Input   {...props} />
+              <Input labelPlacement={"outside"}   {...props} />
           </div>
       </>
 

@@ -7,6 +7,9 @@ import Sidebar from "@/app/sidebar/page";
 
 import localFont from "@next/font/local";
 
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 const Shabnam_FD = localFont({
     src: [
@@ -40,6 +43,17 @@ export default function RootLayout({
     return (
         <html lang="fa" dir={'rtl'} className={`${Shabnam_FD.className} `}>
         <body style={{direction: "rtl"}}>
+        <ToastContainer
+            position="top-center"
+            autoClose={5000}
+            hideProgressBar={true}
+            newestOnTop={false}
+            closeOnClick
+            rtl={true}
+            pauseOnFocusLoss
+            pauseOnHover
+            theme="light"
+        />
         {pathName.endsWith('/') ? children :
             <div>
                 <Navbar/>

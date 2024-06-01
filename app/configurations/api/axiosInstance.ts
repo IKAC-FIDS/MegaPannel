@@ -3,18 +3,28 @@ import axios from "axios";
 
 import router from "next/router";
 
+
+import { getCookie } from 'cookies-next';
+import redirectTo from "@/app/shard/utils/redirectTo";
+
+
+
 const axiosInstance = axios.create({
     baseURL: "BASE_URL",
     timeout: 30000,
+
     headers: {
         "Content-Type": "application/json",
-
     },
 });
-const requests: any = {};
+
 
 axiosInstance.interceptors.request.use(
     (config) => {
+        const token = getCookie("token")
+
+        config.headers["Authorization"] = token ?? "";
+
 
         return config;
     },
@@ -24,9 +34,11 @@ axiosInstance.interceptors.request.use(
 );
 
 
+
 axiosInstance.interceptors.response.use(
     (response) => {
 
+        console.log(getCookie("token"))
         return response;
     },
     async function (error) {
@@ -36,10 +48,7 @@ axiosInstance.interceptors.response.use(
             switch (error.response.status) {
                 case 400:
 
-                    if (error.response.data.data.message.match("loginRequired")) {
 
-
-                    }
                     return {status: error.response.status};
                 case 404:
 
@@ -50,7 +59,7 @@ axiosInstance.interceptors.response.use(
                 case 401:
                 case 450:
                 case 451:
-
+                    await redirectTo("/");
                     return {status: 450};
                 case 440:
                     if (originalRequest._retry) break;
