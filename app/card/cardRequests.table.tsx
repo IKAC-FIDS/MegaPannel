@@ -1,24 +1,28 @@
-import React, {FormEvent, useMemo, useRef, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
+    Card,
+    CardBody,
     Chip,
     ChipProps,
+    Divider,
     Pagination,
     Select,
-    SelectItem, Divider
+    SelectItem, Spinner,
+    Tab,
+    Table,
+    TableBody,
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow,
+    Tabs
 } from "@nextui-org/react";
-
-import {Tabs, Tab, Card, CardBody} from "@nextui-org/react";
 import {columns} from "./data";
 import Modal from "@/app/shard/components/Modal";
 import {utcToShamsi} from "@/app/shard/utils/utcToShamsi";
 import Input from "@/app/shard/components/Input";
 import axiosInstance from "@/app/configurations/api/axiosInstance";
+import AxiosInstance from "@/app/configurations/api/axiosInstance";
 import useSWR from "swr";
 import Image from "next/image";
 import SearchIcon from "@/app/shard/assets/icons/searchicon.svg"
@@ -27,7 +31,7 @@ import Excel from "@/app/card/assets/icons/excel.svg"
 import Post from "@/app/card/assets/icons/post.svg"
 import More from "@/app/card/assets/icons/more.svg"
 import Button from "@/app/shard/components/Button";
-import AxiosInstance from "@/app/configurations/api/axiosInstance";
+import status from "@/app/shard/components/Status";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     1: "warning",
@@ -105,17 +109,19 @@ interface CardRequest {
     trakingCode: string | null;
 }
 
-interface TrakingCodeUploadFileProps {
-    hasFailedRecords: boolean;
-    unDoneRecords: unDoneRecords[];
-}
-
 interface unDoneRecords {
     cardNumber: string;
     trakingCode: string;
     status: number;
 }
 
+interface LoadingProps {
+    cardRequestExcel?: boolean;
+    updateExpectedCardRequests?: boolean;
+    insertTrakingCode?: boolean;
+    updateTrakingCode?: boolean;
+    trakingCodeUploadFile?: boolean;
+}
 
 const getCardRequests = async (currentPage: number, status: number, filter: string) => {
     const statusCode = status ? `&status=${status}` : ""
@@ -125,12 +131,15 @@ const getCardRequests = async (currentPage: number, status: number, filter: stri
     );
     if (response.status === 200) {
         return response.data
-    }
+    } else return []
 
 }
 
 const checkStatus = (status: number) => {
-    return statusList.find(({id}) => id === status)?.label;
+    if (status) return statusList.find(({id}) => id === status)?.label;
+
+    else return []
+
 }
 
 const checkNull = (value: string | number) => {
@@ -185,12 +194,23 @@ const statusList = [
 
 
 const TableComponent = () => {
+
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [selectedStatus, setSelectedStatus] = useState<number>(0)
     const [filter, setFilter] = useState<string>("")
-    const [page, setPage] = React.useState(1);
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState<LoadingProps>({
+        cardRequestExcel: false,
+        updateExpectedCardRequests: false,
+        insertTrakingCode: false,
+        updateTrakingCode: false,
+        trakingCodeUploadFile: false
+    })
+
+    const [loadingList, setLoadingList] = useState<string[]>(["627026f2-67f9-4101-9fd1-29fa47818fa1"])
     let typingTimeout: NodeJS.Timeout | null = null;
-    const inputRef = useRef<HTMLInputElement>(null);
+    const [trackLoading, setTrackLoading] = useState<boolean>(false);
+
     const {
         data: cardRequests,
         isValidating,
@@ -198,12 +218,12 @@ const TableComponent = () => {
     } = useSWR(`http://192.168.106.7:7040/api/card-requests?page=${page}&status=${selectedStatus}&filter=${filter}`
         , async () => await getCardRequests(page, selectedStatus, filter), {keepPreviousData: true,});
 
+
     const rowsPerPage = 10;
-
-
     const pages = useMemo(() => {
         return cardRequests?.totalPageCount ? Math.ceil(cardRequests.totalPageCount) : 0;
     }, [cardRequests?.totalPageCount, rowsPerPage]);
+
 
     const updateTrakingCode = async (cardNumber: string, trakingCode: string) => {
         const response = await axiosInstance.post(`http://192.168.106.7:7040/api/update-traking-code`,
@@ -215,56 +235,99 @@ const TableComponent = () => {
             return response.data
         } else return []
     }
+
+
     const insertTrakingCode = async (cardNumber: string, trakingCode: string) => {
-        const response = await axiosInstance.post(`http://192.168.106.7:7040/api/insert-traking-code`, {
-            cardNumber: cardNumber,
-            trakingCode: trakingCode
-        })
-        if (response.status === 200) {
-            return response.data
-        } else return []
-    }
-    const handlePostNumber = (e: any, trakingCode: string | null, cardNumber: string) => {
-        if (e.key === "Enter") {
-            if (trakingCode === null) {
-                console.log('null')
-
-                insertTrakingCode(cardNumber, e.target.value)
+        setTrackLoading(true);
+        console.log(trackLoading)
+        try {
+            const response = await axiosInstance.post(`http://192.168.106.7:7040/api/insert-traking-code`, {
+                cardNumber: cardNumber,
+                trakingCode: trakingCode
+            });
+            if (response.status === 200) {
+                setTrackLoading(false);
+                console.log(trackLoading)
+                return response.data;
             } else {
-                console.log("ridife")
-                updateTrakingCode(cardNumber, e.target.value)
+                setTrackLoading(false);
+                return [];
             }
+        } catch (error) {
+            setTrackLoading(false);
+            console.error(error);
+            return [];
         }
-
     };
 
-    const cardRequestExcel = async (fileName: string): Promise<void> => {
+
+    const handlePostNumber = async (e: any, trakingCode: string | null, cardNumber: string, id: string) => {
+            if (e.key === "Enter") {
+                setLoadingList([...loadingList, id]);
+                if (trakingCode === null) {
+                    await insertTrakingCode(cardNumber, e.target.value)
+                } else {
+                    console.log("ridife")
+                    await updateTrakingCode(cardNumber, e.target.value)
+                }
+
+                setLoadingList(loadingList.filter(item =>
+                    item !== id))
+
+
+            }
+        }
+    ;
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    const updateExpectedCardRequests = async () => {
+        setLoading({...loading, updateExpectedCardRequests: true})
+        const response = await axiosInstance.post(`http://192.168.106.7:7040/api/update-expected-card-requests`)
+        if (response.status === 200) {
+            setLoading({...loading, updateExpectedCardRequests: false})
+        }
+
+
+    }
+
+
+    const cardRequestExcel = async (): Promise<void> => {
+        setLoading({...loading, cardRequestExcel: true})
         const response = await axiosInstance.get<Blob>(`http://192.168.106.7:7040/api/card-request-excel`, {responseType: 'arraybuffer'})
 
         // if (!response.data || response.data.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
         //     throw new Error('The downloaded file is not a valid Excel file.');
         // }
 
-        const fileBlob = new Blob([response.data], {type: response.data.type});
+        if (response.status === 200) {
+            setLoading({...loading, cardRequestExcel: false})
+            const fileBlob = new Blob([response.data], {type: response.data.type});
 
-        const defaultFileName = `${Date.now()}.xlsx`;
+            const defaultFileName = `${Date.now()}.xlsx`;
 
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(fileBlob);
-        link.download = defaultFileName;
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(fileBlob);
+            link.download = defaultFileName;
 
-        document.body.appendChild(link);
+            document.body.appendChild(link);
 
-        link.click();
+            link.click();
 
-        link.parentNode?.removeChild(link);
+            link.parentNode?.removeChild(link);
+
+        } else if (response.status !== 200) {
+            setLoading({...loading, cardRequestExcel: true})
+
+        }
     }
-/////////////////////////////////////////////////////////////////////////////////////////////
 
-    const updateExpectedCardRequests = async () => {
-        await axiosInstance.post(`http://192.168.106.7:7040/api/update-expected-card-requests`)
 
-    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     const renderCell = React.useCallback((card: Card, columnKey: React.Key) => {
 
         const cellValue = card[columnKey as keyof Card];
@@ -319,15 +382,22 @@ const TableComponent = () => {
                 return (
                     <div>
 
-                        <Input type={"number"} className={"text-center w-36 h-9 rounded-none"}
-                               placeholder={card.cardRequest.trakingCode}
-                               onKeyDown={(e: any) => {
+                        {
 
-                                   handlePostNumber(e, card.cardRequest.trakingCode, card.cardRequest.cardNumber)
-                               }}
+                            // loadingList.includes(card.cardRequest.id) ? <Spinner/> :
 
 
-                        />
+                            (
+                                <Input type={"number"} className={"text-center w-36 h-9 rounded-none"}
+                                       placeholder={card.cardRequest.trakingCode}
+                                       onKeyDown={(e: any) => {
+
+                                           handlePostNumber(e, card.cardRequest.trakingCode, card.cardRequest.cardNumber, card.cardRequest.id)
+                                       }}
+
+                                />)
+
+                        }
 
                     </div>
                 )
@@ -423,6 +493,7 @@ const TableComponent = () => {
         }, 500);
     };
 
+
     const bottomContent = React.useMemo(() => {
         return (
             <div className={'flex justify-between items-center mb-20'}>
@@ -457,6 +528,8 @@ const TableComponent = () => {
             </div>
         );
     }, [cardRequests?.statusStatistics]);
+
+    ////////////////////////////
     // const topContent = React.useMemo(() => {
     //     return (
     //         <>
@@ -482,25 +555,20 @@ const TableComponent = () => {
     //
     //     )
     // })
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    ///////////////////////////
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+    const TrakingCodeUploadFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+
+
         if (event.target.files) {
-            setSelectedFile(event.target.files[0]);
-        }
-    };
+            // setTrackLoading(true)
 
-    const handleSubmit = async () => {
 
-        if (!selectedFile) {
-            alert('Please select a file first!');
-            return;
-        }
+            const formData = new FormData();
+            formData.append('file', event.target.files[0]);
 
-        const formData = new FormData();
-        formData.append('file', selectedFile);
 
-        try {
             const response = await AxiosInstance.post("http://192.168.106.7:7040/api/traking-code-upload-file", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -508,34 +576,42 @@ const TableComponent = () => {
             });
 
             console.log('File uploaded successfully:', response.data);
-            if (response.data.hasFailedRecords) {
-                response.data.unDoneRecords.map((items: unDoneRecords, index: number) => {
-                    if (items.status === 0) {
-                        console.log(index + " " + "CardNumberNotFound")
-                    } else if (items.status === 1) {
-                        console.log(index + " " + "WrongTrakingCodePattern")
-                    } else if (items.status === 2) {
-                        console.log(index + " " + "OneElementsIsEmpty")
-                    } else if (items.status === 3) {
-                        console.log(index + " " + "InistalStatusIsNotCorrect")
-                    }
-                })
+            if (response.status === 200) {
+                // setTrackLoading(false)
+
+                // console.log(loading.trakingCodeUploadFile)
+                if (response.data.hasFailedRecords) {
+                    response.data.unDoneRecords.map((items: unDoneRecords, index: number) => {
+                        if (items.status === 0) {
+                            console.log(index + " " + "CardNumberNotFound")
+                        } else if (items.status === 1) {
+                            console.log(index + " " + "WrongTrakingCodePattern")
+                        } else if (items.status === 2) {
+                            console.log(index + " " + "OneElementsIsEmpty")
+                        } else if (items.status === 3) {
+                            console.log(index + " " + "InistalStatusIsNotCorrect")
+                        }
+                    })
+                }
             }
-
-        } catch (error) {
-            console.error('Error uploading file:', error);
         }
+
+
     };
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    // Function to handle button click and trigger file input click
     const handleButtonClick = () => {
+        // setLoading({...loading, trakingCodeUploadFile: true})
         fileInputRef.current?.click();
     };
 
+    useEffect(() => {
+
+    }, [trackLoading]);
+
 
     if (!cardRequests) return (<p>loading</p>)
+
 
     return (
         <>
@@ -544,16 +620,17 @@ const TableComponent = () => {
                 <div
                     className="flex items-center space-x-4 text-small mb-8 bg-white h-20 rounded-xl drop-shadow-lg px-8">
 
-                    <div className={'ml-4'}>
-                        <Image src={SearchIcon.src} alt={"search"} width={24} height={24}/>
+                    <div className={'ml-4 flex'}>
+                        {/*<Image src={SearchIcon.src} alt={"search"} width={24} height={24}/>*/}
+                        <Input onChange={handleInputChange}/>
                     </div>
 
                     <div className={'h-10 border'}></div>
 
                     <div className={'flex'}>
                         <Image src={Excel.src} alt={"search"} width={30} height={30}/>
-                        <Button variant={'light'} onClick={() => {
-                            cardRequestExcel("test.xlsx")
+                        <Button variant={'light'} isLoading={loading?.cardRequestExcel} onClick={() => {
+                            cardRequestExcel()
                         }}>دریافت فایل اکسل</Button>
                     </div>
 
@@ -561,41 +638,18 @@ const TableComponent = () => {
 
                     <div className={'flex gap-3'}>
                         <Image src={Print.src} alt={"search"} width={24} height={24}/>
-                        <Button variant={'light'} onClick={() => {
+                        <Button variant={'light'} isLoading={loading?.updateExpectedCardRequests} onClick={() => {
                             updateExpectedCardRequests()
                         }}>تایید چاپ</Button>
                     </div>
-                    <div className={'h-10 border'}></div>
+                    {/*<div className={'h-10 border'}></div>*/}
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={TrakingCodeUploadFile}
+                    />
 
-                    <div className={'flex gap-3'}>
-                        <Image src={Print.src} alt={"search"} width={24} height={24}/>
-
-                        <Button variant={'light'}
-                            // className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
-                                onClick={handleSubmit}>
-                            انتخاب فایل
-                        </Button>
-                        <input placeholder={"test"} type="file" accept=".xlsx, .xls"
-                               onChange={handleFileChange}/>
-
-
-                        {/* Hidden file input element */}
-                        {/*<input*/}
-                        {/*    type="file"*/}
-                        {/*    ref={fileInputRef}*/}
-                        {/*    className="hidden"*/}
-                        {/*    onChange={handleFileChange}*/}
-                        {/*/>*/}
-                        {/*/!* Custom button to trigger file input *!/*/}
-                        {/*<button*/}
-                        {/*    onClick={handleButtonClick}*/}
-                        {/*    className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"*/}
-                        {/*>*/}
-                        {/*    Upload File*/}
-                        {/*</button>*/}
-
-
-                    </div>
 
                 </div>
                 <Table
@@ -604,7 +658,9 @@ const TableComponent = () => {
                         pages > 0 ? bottomContent : null
                     }
 
-                    aria-label="Example table with custom cells">
+                    aria-label="Example table with custom cells"
+
+                >
                     <TableHeader columns={columns}>
                         {(column) => (
 
@@ -633,10 +689,17 @@ const TableComponent = () => {
                                             column.uid === "postNumber" ?
 
                                                 <div className={"flex items-center"}>
+
                                                     <Image src={Post.src} alt={"post img"} width={14} height={14}/>
-                                                    <Button variant={"light"}>
+                                                    {trackLoading ? (<p>HI</p>) : <Button
+                                                        onClick={handleButtonClick}
+                                                        variant={'light'}
+                                                        // isLoading={trackLoading}
+                                                        // className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+                                                    >
                                                         {column.name}
-                                                    </Button>
+                                                    </Button>}
+
                                                 </div>
                                                 :
                                                 column.uid === "actions" ?
