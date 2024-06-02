@@ -9,6 +9,7 @@ import localFont from "@next/font/local";
 
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
+import {SessionProvider, useSession} from "next-auth/react";
 
 
 const Shabnam_FD = localFont({
@@ -36,8 +37,8 @@ export default function RootLayout({
                                    }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const pathName = usePathname()
 
+    const pathName = usePathname()
     document.dir = "rtl"
 
     return (
@@ -54,6 +55,7 @@ export default function RootLayout({
             pauseOnHover
             theme="light"
         />
+
         {pathName.endsWith('/') ? children :
             <div>
                 <Navbar/>

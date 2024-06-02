@@ -42,6 +42,7 @@ import {Pagination} from "@nextui-org/react";
 import {toast} from "react-toastify";
 import {useRouter} from "next/navigation";
 import {id} from "postcss-selector-parser";
+import {getSession} from "next-auth/react";
 
 interface Request {
     id: string
@@ -144,7 +145,7 @@ const rejectReasons = [
 
 const Identities = () => {
     const [page, setPage] = React.useState<number>(1);
-    const [changeList, setChangeList] = React.useState<string[]>([]);
+    const [changeList, setChangeList] = React.useState<{id:string,approve:boolean}[]>([]);
     const [activePage, setActivePage] = React.useState(1);
     const swiperRef = useRef<SwiperRef>(null);
     const [rejectReason, setRejectReason] = useState<string | null>(null)
@@ -210,7 +211,7 @@ const Identities = () => {
             setRejectReason(null)
             router.refresh()
         }
-        setChangeList([...changeList, identificationStatusId])
+        setChangeList([...changeList, {id:identificationStatusId,approve:false}])
     }
 
     const approve = async (identificationStatusId: string, data: {
@@ -221,20 +222,23 @@ const Identities = () => {
 
         if (Object.values(data).every(value => value !== null && value !== undefined)) {
             const response = await axiosInstance.post(
-                `https://digibanking.sbank.ir/detective/api/v1/operators/identities/${identificationStatusId}/reject`, data
+                `https://digibanking.sbank.ir/detective/api/v1/operators/identities/${identificationStatusId}/verify`, data
             );
             if (response.status === 200) {
                 toast.success("درخواست کاربر تایید شد")
                 setApproveDetail({cardSerial: null, nationalCode: null})
-                setChangeList([...changeList, identificationStatusId])
+                setChangeList([...changeList, {id:identificationStatusId,approve:true}])
                 if (swiperRef.current) swiperRef.current.swiper.slideNext()
             }
         } else {
             toast.error("فیلد های خالی را پر کنید")
         }
-
-
     }
+
+
+
+
+
 
 
     if (isLoading) return <div className={` w-full h-[90%] flex flex-col justify-center items-center p-6`}
@@ -323,13 +327,13 @@ const Identities = () => {
                                                 <div className={"flex flex-row  w-full gap-2 h-full  items-start mt-4"}>
 
 
-                                                    <Button isDisabled={changeList.includes(request.id)}
+                                                    <Button isDisabled={changeList.find((item)=>item.id===request.id)}
                                                             className={"w-1/2"} color={"danger"} onClick={() => {
                                                         onOpen()
                                                     }}>
                                                         رد
                                                     </Button>
-                                                    <Button isDisabled={changeList.includes(request.id)}
+                                                    <Button isDisabled={changeList.find((item)=>item.id===request.id)}
                                                             className={"w-1/2 text-white"} color={"success"}
                                                             onClick={() => approve(request.id, {
                                                                 cardSerial: approveDetail?.cardSerial ?? request.userInfo.cardSerial,
@@ -349,6 +353,12 @@ const Identities = () => {
                                             />
 
 
+                                            { <div
+                                                className={` hidden ${changeList.find((item)=>item.id===request.id && item.approve ? "block border-green-600 text-green-600" : "block border-red-600 text-red-600") }     w-[200px] h-[70px] border-4   rounded-lg -rotate-45 absolute bottom-56 right-60 z-20 flex items-center justify-center ${styles.rubber_stamp}`}>
+
+                                                <p className={"font-black text-2xl"}>رد شده</p>
+                                            </div>
+                                            }
                                         </div>
 
                                     </div>
