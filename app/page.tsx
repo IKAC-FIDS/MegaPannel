@@ -37,7 +37,7 @@ export default function Home() {
                         <Input label="نام کاربری"
                                labelPlacement="outside" className={"mb-8"}
                                onChange={(e: any) => setCredentials({...credentials, userName: e.target.value})}/>
-                        <Input label="رمز عبور"
+                        <Input type={"password"}  label="رمز عبور"
                                labelPlacement="outside"
                                onChange={(e: any) => setCredentials({...credentials, password: e.target.value})}/>
 
