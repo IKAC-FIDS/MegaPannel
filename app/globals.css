@@ -70,3 +70,41 @@ body {
     color: #fff;
     background: #007aff;
   }
+
+.nav-container {
+  position: relative;
+  background: white;
+  padding-left: 2rem;
+  width: 16rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: 1rem;
+}
+
+.nav-item {
+  position: relative;
+  padding: 1rem;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  transition: color 0.3s;
+}
+
+.nav-item.inactive {
+  color: #6b7280; /* Gray color for inactive items */
+}
+
+.nav-item.active {
+  color: #1d4ed8; /* Blue color for active items */
+}
+
+.active-indicator {
+  position: absolute;
+  right: 0;
+  width: 0.375rem; /* 1.5 divided by 4 */
+  height: 4rem; /* Adjust as needed */
+  background-color: #1d4ed8; /* Blue color */
+  border-radius: 0.5rem;
+  transition: transform 0.3s ease;
+}

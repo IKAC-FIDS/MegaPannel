@@ -79,7 +79,7 @@ const getRequests = async (currentPage: number) => {
 
     // `http://192.168.67.17:7003/api/v2/operators/identities?Page=${currentPage}&Size=${10}`
     const response = await axiosInstance.get(
-        `http://192.168.67.17:7003/api/v2/operators/identities?Page=${currentPage}&Size=${100}`
+        `http://192.168.67.17:7003/api/v2/operators/identities?Page=${currentPage}&Size=${100}&status=HumanVerificationRequired`
     );
     if (response.status === 200) {
         return response.data
@@ -150,7 +150,6 @@ const Identities = () => {
     const swiperRef = useRef<SwiperRef>(null);
     const [rejectReason, setRejectReason] = useState<string | null>(null)
     const {isOpen, onOpen, onOpenChange, getDisclosureProps} = useDisclosure();
-    const router = useRouter()
     const [approveDetail, setApproveDetail] = React.useState<{
         nationalCode: string | null | undefined,
         cardSerial: string | null | undefined
@@ -209,9 +208,10 @@ const Identities = () => {
         if (response.status === 200) {
             toast.success("درخواست کاربر رد شد")
             setRejectReason(null)
-            router.refresh()
-        }
         setChangeList([...changeList, {id:identificationStatusId,approve:false}])
+        if (swiperRef.current) swiperRef.current.swiper.slideNext()
+        }
+
     }
 
     const approve = async (identificationStatusId: string, data: {
@@ -310,15 +310,20 @@ const Identities = () => {
 
                                             <div
                                                 className={"flex flex-col   gap-2 h-full w-3/4 items-end justify-center"}>
-                                                <p className={"font-bold text-2xl"}>اطلاعات تکمیلی</p>
+                                                <p className={"font-bold text-2xl mb-4"}>اطلاعات تکمیلی</p>
                                                 <Input onChange={(e) => {
                                                     setApproveDetail({...approveDetail, nationalCode: e.target.value})
-                                                }} label="کد ملی" placeholder={request.userInfo.nationalCode}/>
+                                                }} label="کد ملی" placeholder={request.userInfo.nationalCode}
+                                                       isDisabled={!!changeList.find((item) => item.id === request.id)}
+                                                />
                                                 <Input onChange={(e) => {
                                                     setApproveDetail({...approveDetail, cardSerial: e.target.value})
-                                                }} label="سریال کارت ملی / شناسه رسید"
+                                                }}
+                                                       isDisabled={!!changeList.find((item) => item.id === request.id)}
+                                                       label="سریال کارت ملی / شناسه رسید"
                                                        placeholder={request.userInfo?.cardSerial}/>
                                                 <Input
+                                                    isDisabled={!!changeList.find((item) => item.id === request.id)}
                                                     value={request.userInfo?.birthDate}
                                                     onChange={handleChange}
                                                     placeholder="روز/ماه/سال"
@@ -327,13 +332,13 @@ const Identities = () => {
                                                 <div className={"flex flex-row  w-full gap-2 h-full  items-start mt-4"}>
 
 
-                                                    <Button isDisabled={changeList.find((item)=>item.id===request.id)}
+                                                    <Button isDisabled={!!changeList.find((item) => item.id === request.id)}
                                                             className={"w-1/2"} color={"danger"} onClick={() => {
                                                         onOpen()
                                                     }}>
                                                         رد
                                                     </Button>
-                                                    <Button isDisabled={changeList.find((item)=>item.id===request.id)}
+                                                    <Button isDisabled={!!changeList.find((item) => item.id === request.id)}
                                                             className={"w-1/2 text-white"} color={"success"}
                                                             onClick={() => approve(request.id, {
                                                                 cardSerial: approveDetail?.cardSerial ?? request.userInfo.cardSerial,
@@ -353,10 +358,16 @@ const Identities = () => {
                                             />
 
 
-                                            { <div
-                                                className={` hidden ${changeList.find((item)=>item.id===request.id && item.approve ? "block border-green-600 text-green-600" : "block border-red-600 text-red-600") }     w-[200px] h-[70px] border-4   rounded-lg -rotate-45 absolute bottom-56 right-60 z-20 flex items-center justify-center ${styles.rubber_stamp}`}>
+                                            { changeList.find((item)=>item.id===request.id)?.approve === false && <div
+                                                className={`  "block border-red-600 text-red-600  w-[200px] h-[70px] border-4   rounded-lg -rotate-12 absolute bottom-56 right-60 z-20 flex items-center justify-center ${styles.rubber_stamp}`}>
 
                                                 <p className={"font-black text-2xl"}>رد شده</p>
+                                            </div>
+                                            }
+                                            { changeList.find((item)=>item.id===request.id)?.approve  && <div
+                                                className={`  "block border-green-600 text-green-600  w-[200px] h-[70px] border-4   rounded-lg -rotate-12 absolute bottom-56 right-60 z-20 flex items-center justify-center ${styles.rubber_stamp}`}>
+
+                                                <p className={"font-black text-2xl"}>تایید شده</p>
                                             </div>
                                             }
                                         </div>
