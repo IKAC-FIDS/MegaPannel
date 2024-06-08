@@ -45,8 +45,8 @@ const Header = () => {
                 />
                 <NavbarContent className={"max-w-2/12 "}>
 
-                    <NavbarItem className={'ml-56'}> <Image src={Logo.src} alt={"Notification"} width={70}
-                                                            height={13.66}/></NavbarItem>
+                    <NavbarItem className={'md:ml-56'}> <Image src={Logo.src} alt={"Notification"} width={70}
+                                                               height={13.66}/></NavbarItem>
 
                     <NavbarItem>
                         <Badge content="6" shape="circle" color="danger">
@@ -97,7 +97,7 @@ const Header = () => {
                 {/*<NavbarContent className="hidden sm:flex gap-10" justify="center">*/}
                 {/*    <NavbarItem>*/}
                 {/*        <div*/}
-                {/*            className={"w-9 bg-gray-200 hidden lg:flex justify-center items-center rounded-full p-1"}>*/}
+                {/*            className={"w-9 bg-gray-200 hidden md:flex justify-center items-center rounded-full p-1"}>*/}
                 {/*            <Image*/}
                 {/*                src={Settings.src}*/}
                 {/*                alt={"dashboard Logo"}*/}
@@ -111,7 +111,7 @@ const Header = () => {
 
                 {/*        <div*/}
                 {/*            className={*/}
-                {/*                "w-9  bg-gray-200 hidden lg:flex justify-center items-center rounded-full p-1"*/}
+                {/*                "w-9  bg-gray-200 hidden md:flex justify-center items-center rounded-full p-1"*/}
                 {/*            }*/}
                 {/*        >*/}
                 {/*            <Image*/}

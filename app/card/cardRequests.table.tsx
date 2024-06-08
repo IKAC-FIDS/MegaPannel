@@ -533,7 +533,7 @@ const TableComponent = () => {
     // const topContent = React.useMemo(() => {
     //     return (
     //         <>
-    //             <div className={"rounded-full w-64 h-12 hidden lg:flex items-center justify-center"}>
+    //             <div className={"rounded-full w-64 h-12 hidden md:flex items-center justify-center"}>
     //                 <Input onChange={handleInputChange} className={"rounded-full"} size={"lg"}
     //                        labelPlacement={"outside-left"} placeholder="جستو وجو"/>
     //             </div>
@@ -723,8 +723,6 @@ const TableComponent = () => {
                     </TableBody>
 
                 </Table>
-
-
             </div>
         </>
 

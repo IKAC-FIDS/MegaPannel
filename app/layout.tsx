@@ -44,11 +44,14 @@ export default function RootLayout({
             <div>
                 <Navbar/>
                 <main className={"flex relative"}>
-                    <div className={"fixed right-0 w-1/6"}><Sidebar/></div>
+                    <div className={"fixed right-0 hidden md:flex md:w-1/6"}><Sidebar/></div>
                     <div style={{background: "#f5f5f5", height: "100vh"}}
-                         className={"fixed left-0 w-full lg:w-10/12 scrollbar-thin overflow-y-scroll"}>{children}</div>
+                         className={"fixed left-0 w-full md:w-10/12 scrollbar-thin overflow-y-scroll"}>
+                        {children}
+                    </div>
                 </main>
-            </div>}
+            </div>
+        }
 
 
         </body>

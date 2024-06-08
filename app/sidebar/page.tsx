@@ -42,7 +42,7 @@ const NavBar: React.FC = () => {
     return (
         <>
 
-            <div className="relative  bg-white pl-8 w-64 flex-col hidden lg:flex  gap-5 pt-4">
+            <div className="relative  bg-white pl-8 w-64 flex-col hidden md:flex  gap-5 pt-4">
                 {sideTabs(pathName.split("/")[1]).map((item, index) => (
                     <NavItem
                         key={index}
