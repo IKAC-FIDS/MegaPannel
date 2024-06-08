@@ -20,7 +20,7 @@ const options = {
     colors.magentafuchsia[600],
   ],
   titleTextStyle: {
-    textAlign: "left", // ساب‌تایتل اصلی به سمت راست
+    textAlign: "left",
   },
   subtitleTextStyle: {
     textAlign: "left", // ساب‌تایتل فرعی به سمت راست

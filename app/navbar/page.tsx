@@ -3,7 +3,7 @@
 import Image from "next/image";
 import BankDashIcon from "@/app/dashboard/shard/assets/icons/bankdash.svg";
 import Notification from "@/app/shard/assets/icons/notification.svg";
-import Person from "@/app/navbar/assets/images/person.svg";
+import Person from "@/app/navbar/assets/images/person.png";
 import Settings from "@/app/shard/assets/icons/settings.svg";
 import Logo from "@/app/navbar/assets/icons/logo.svg";
 import SearchIcon from "@/app/shard/assets/icons/searchicon.svg";
@@ -23,7 +23,12 @@ import Link from "next/link";
 import Input from "@/app/shard/components/Input";
 import sideTabs, {dashboards, dashProps} from "@/app/sideTabs";
 import Button from "@/app/shard/components/Button";
+import {deleteCookie, getCookie} from "cookies-next";
+import axiosInstance from "@/app/configurations/api/axiosInstance";
 
+
+const items = dashboards
+items.push({label: "خروج",route: "/"})
 
 const Header = () => {
 
@@ -32,6 +37,7 @@ const Header = () => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    const user = JSON.parse(getCookie("user") as string)
 
     return (
         <>
@@ -61,29 +67,35 @@ const Header = () => {
                         </Badge>
                     </NavbarItem>
                     <NavbarItem className={"flex"}>
-                        <Image src={Person.src} alt={"person"} width={44} height={44}/>
+                        <Image src={user.image ?? Person.src} alt={"person"} width={44} height={44}/>
 
                     </NavbarItem>
                     <NavbarItem>
-                        <div>سارا حسینی</div>
-                        <div>کارشناس امور مشتریان</div>
+                        <div>{user.fullName}</div>
+                        <div>{user.title}</div>
                     </NavbarItem>
                     <NavbarItem className={"w-60 mr-auto"}>
                         <Select
-                            items={dashboards}
+                            items={ items}
                             label="انتخاب پنل"
                             color={"primary"}
                             defaultSelectedKeys={[dashboards.find((dashboard) => {
                                 return dashboard.route.includes(pathName.split("/")[1])
                             })?.route]}
+
                         >
                             {(dashboard: dashProps) =>
 
                                 <SelectItem
                                     key={dashboard.route}
                                     href={dashboard.route}
-                                    value={dashboard.label}>
+                                    value={dashboard.label}
+                                onClick={async ()=>{if(dashboard.route === "/"){
+                               await axiosInstance.post("http://localhost:3000/api/logout")
+                                }
+                                }}>
                                     {dashboard.label}
+
                                 </SelectItem>
 
                             }
