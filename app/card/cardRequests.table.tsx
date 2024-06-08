@@ -32,6 +32,8 @@ import Post from "@/app/card/assets/icons/post.svg"
 import More from "@/app/card/assets/icons/more.svg"
 import Button from "@/app/shard/components/Button";
 import status from "@/app/shard/components/Status";
+import Style from "@/app/shard/components/Input/styles.module.css"
+import SearchInput from "@/app/shard/components/SearchInput";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     1: "warning",
@@ -206,6 +208,7 @@ const TableComponent = () => {
         updateTrakingCode: false,
         trakingCodeUploadFile: false
     })
+
 
     const [loadingList, setLoadingList] = useState<string[]>(["627026f2-67f9-4101-9fd1-29fa47818fa1"])
     let typingTimeout: NodeJS.Timeout | null = null;
@@ -496,8 +499,8 @@ const TableComponent = () => {
 
     const bottomContent = React.useMemo(() => {
         return (
-            <div className={'flex justify-between items-center mb-20'}>
-                <div className="flex gap-2 w-full h-10">
+            <div className={'flex justify-between items-center mb-20 flex-col md:flex-row '}>
+                <div className="flex gap-2 w-full h-10 mb-28 md:mb-0 flex-wrap md:flex-nowrap">
                     {cardRequests?.statusStatistics && Object.entries(cardRequests.statusStatistics).map(([key, value]) => (
 
                         <>
@@ -511,7 +514,7 @@ const TableComponent = () => {
                     ))}
 
                 </div>
-                <div className="flex w-full" style={{direction: "ltr"}}>
+                <div className="flex w-full " style={{direction: "ltr"}}>
                     <Pagination
                         isCompact
                         showControls
@@ -533,7 +536,7 @@ const TableComponent = () => {
     // const topContent = React.useMemo(() => {
     //     return (
     //         <>
-    //             <div className={"rounded-full w-64 h-12 hidden lg:flex items-center justify-center"}>
+    //             <div className={"rounded-full w-64 h-12 hidden md:flex items-center justify-center"}>
     //                 <Input onChange={handleInputChange} className={"rounded-full"} size={"lg"}
     //                        labelPlacement={"outside-left"} placeholder="جستو وجو"/>
     //             </div>
@@ -616,42 +619,44 @@ const TableComponent = () => {
     return (
         <>
             <div className={'overflow-y-auto'}>
-                <div className={"font-black text-3xl mb-7"}>لیست کارت های نقدی</div>
+
+
+                {/*///////////*/}
                 <div
-                    className="flex items-center space-x-4 text-small mb-8 bg-white h-20 rounded-xl drop-shadow-lg px-8">
+                    className="md:flex hidden items-center space-x-4 text-small mb-8 bg-white h-20 rounded-xl drop-shadow-lg px-8 justify-between">
 
-                    <div className={'ml-4 flex'}>
-                        {/*<Image src={SearchIcon.src} alt={"search"} width={24} height={24}/>*/}
-                        <Input onChange={handleInputChange}/>
+                    <div className={"font-black text-3xl md:text-justify text-center"}>لیست کارت های نقدی</div>
+                    <div className={'flex items-center flex-row-reverse'}>
+                        <div><SearchInput onChange={handleInputChange}/></div>
+
+                        <div className={'h-10 border mx-6'}></div>
+
+                        <div className={'flex'}>
+                            <Image src={Excel.src} alt={"search"} width={30} height={30}/>
+                            <Button variant={'light'} isLoading={loading?.cardRequestExcel} onClick={() => {
+                                cardRequestExcel()
+                            }}>دریافت فایل اکسل</Button>
+                        </div>
+
+                        <div className={'h-10 border'}></div>
+
+                        <div className={'flex gap-3'}>
+                            <Image src={Print.src} alt={"search"} width={24} height={24}/>
+                            <Button variant={'light'} isLoading={loading?.updateExpectedCardRequests} onClick={() => {
+                                updateExpectedCardRequests()
+                            }}>تایید چاپ</Button>
+                        </div>
+                        {/*<div className={'h-10 border'}></div>*/}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            onChange={TrakingCodeUploadFile}
+                        />
+
                     </div>
-
-                    <div className={'h-10 border'}></div>
-
-                    <div className={'flex'}>
-                        <Image src={Excel.src} alt={"search"} width={30} height={30}/>
-                        <Button variant={'light'} isLoading={loading?.cardRequestExcel} onClick={() => {
-                            cardRequestExcel()
-                        }}>دریافت فایل اکسل</Button>
-                    </div>
-
-                    <div className={'h-10 border'}></div>
-
-                    <div className={'flex gap-3'}>
-                        <Image src={Print.src} alt={"search"} width={24} height={24}/>
-                        <Button variant={'light'} isLoading={loading?.updateExpectedCardRequests} onClick={() => {
-                            updateExpectedCardRequests()
-                        }}>تایید چاپ</Button>
-                    </div>
-                    {/*<div className={'h-10 border'}></div>*/}
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        className="hidden"
-                        onChange={TrakingCodeUploadFile}
-                    />
-
-
                 </div>
+                {/*///////////*/}
                 <Table
 
                     bottomContent={
@@ -723,8 +728,6 @@ const TableComponent = () => {
                     </TableBody>
 
                 </Table>
-
-
             </div>
         </>
 

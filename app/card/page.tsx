@@ -6,7 +6,7 @@ import TableComponent from "@/app/card/cardRequests.table";
 const CardPanel = () => {
     return (
         <>
-            <div className={"p-12"}><TableComponent/></div>
+            <div className={"p-3"}><TableComponent/></div>
 
         </>
     )

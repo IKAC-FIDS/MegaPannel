@@ -8,7 +8,7 @@ import Sidebar from "@/app/sidebar/page";
 import localFont from "@next/font/local";
 
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer, toast } from 'react-toastify';
+import {ToastContainer, toast} from 'react-toastify';
 import {SessionProvider, useSession} from "next-auth/react";
 
 
@@ -40,7 +40,7 @@ export default function RootLayout({
 
     const pathName = usePathname()
     document.dir = "rtl"
-
+    
     return (
         <html lang="fa" dir={'rtl'} className={`${Shabnam_FD.className} `}>
         <body style={{direction: "rtl"}}>
@@ -60,11 +60,14 @@ export default function RootLayout({
             <div>
                 <Navbar/>
                 <main className={"flex relative"}>
-                    <div className={"fixed right-0 w-1/6"}><Sidebar/></div>
+                    <div className={"md:fixed md:right-0 hidden md:flex md:w-1/6"}><Sidebar/></div>
                     <div style={{background: "#f5f5f5", height: "100vh"}}
-                         className={"fixed left-0 w-full lg:w-10/12 scrollbar-thin overflow-y-scroll"}>{children}</div>
+                         className={"fixed left-0 w-full md:w-10/12 scrollbar-thin overflow-y-scroll"}>
+                        {children}
+                    </div>
                 </main>
-            </div>}
+            </div>
+        }
 
 
         </body>

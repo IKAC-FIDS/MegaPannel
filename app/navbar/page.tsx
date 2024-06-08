@@ -7,7 +7,7 @@ import Person from "@/app/navbar/assets/images/person.png";
 import Settings from "@/app/shard/assets/icons/settings.svg";
 import Logo from "@/app/navbar/assets/icons/logo.svg";
 import SearchIcon from "@/app/shard/assets/icons/searchicon.svg";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {
     Navbar,
     NavbarBrand,
@@ -28,7 +28,7 @@ import axiosInstance from "@/app/configurations/api/axiosInstance";
 
 
 const items = dashboards
-items.push({label: "خروج",route: "/"})
+items.push({label: "خروج", route: "/"})
 
 const Header = () => {
 
@@ -51,10 +51,13 @@ const Header = () => {
                 />
                 <NavbarContent className={"max-w-2/12 "}>
 
-                    <NavbarItem className={'ml-56'}> <Image src={Logo.src} alt={"Notification"} width={70}
-                                                            height={13.66}/></NavbarItem>
+                    <NavbarItem className={'md:ml-56 md:flex hidden'}>
+                        <Image src={Logo.src} alt={"Notification"}
+                               width={70}
+                               height={13.66}/>
+                    </NavbarItem>
 
-                    <NavbarItem>
+                    <NavbarItem className={'md:flex hidden'}>
                         <Badge content="6" shape="circle" color="danger">
                             <Button
                                 radius="full"
@@ -74,9 +77,9 @@ const Header = () => {
                         <div>{user.fullName}</div>
                         <div>{user.title}</div>
                     </NavbarItem>
-                    <NavbarItem className={"w-60 mr-auto"}>
+                    <NavbarItem className={"w-[180px] md:w-60 md:mr-auto"}>
                         <Select
-                            items={ items}
+                            items={items}
                             label="انتخاب پنل"
                             color={"primary"}
                             defaultSelectedKeys={[dashboards.find((dashboard) => {
@@ -90,10 +93,11 @@ const Header = () => {
                                     key={dashboard.route}
                                     href={dashboard.route}
                                     value={dashboard.label}
-                                onClick={async ()=>{if(dashboard.route === "/"){
-                               await axiosInstance.post("http://localhost:3000/api/logout")
-                                }
-                                }}>
+                                    onClick={async () => {
+                                        if (dashboard.route === "/") {
+                                            await axiosInstance.post("http://localhost:3000/api/logout")
+                                        }
+                                    }}>
                                     {dashboard.label}
 
                                 </SelectItem>
@@ -109,7 +113,7 @@ const Header = () => {
                 {/*<NavbarContent className="hidden sm:flex gap-10" justify="center">*/}
                 {/*    <NavbarItem>*/}
                 {/*        <div*/}
-                {/*            className={"w-9 bg-gray-200 hidden lg:flex justify-center items-center rounded-full p-1"}>*/}
+                {/*            className={"w-9 bg-gray-200 hidden md:flex justify-center items-center rounded-full p-1"}>*/}
                 {/*            <Image*/}
                 {/*                src={Settings.src}*/}
                 {/*                alt={"dashboard Logo"}*/}
@@ -123,7 +127,7 @@ const Header = () => {
 
                 {/*        <div*/}
                 {/*            className={*/}
-                {/*                "w-9  bg-gray-200 hidden lg:flex justify-center items-center rounded-full p-1"*/}
+                {/*                "w-9  bg-gray-200 hidden md:flex justify-center items-center rounded-full p-1"*/}
                 {/*            }*/}
                 {/*        >*/}
                 {/*            <Image*/}
