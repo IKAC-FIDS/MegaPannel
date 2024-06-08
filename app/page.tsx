@@ -16,6 +16,7 @@ import {cookies} from "next/headers";
 
 export default function Home() {
 
+    const [loading, setLoading] = useState(false)
     const [credentials, setCredentials] = useState<{
         userName: string | null,
         password: string | null
@@ -23,11 +24,11 @@ export default function Home() {
     const router = useRouter()
 
 
-
     return (
         <>
 
-            <div className={`${style.login_background} w-full h-screen flex flex-col justify-center items-center bg-blue-700`}
+            <div
+                className={`${style.login_background} w-full h-screen flex flex-col justify-center items-center bg-blue-700`}
 
             >
                 <div>
@@ -59,23 +60,25 @@ export default function Home() {
                     </svg>
                 </div>
 
-                <div className={'bg-white w-1/3 h-[26rem] p-8  rounded-lg flex flex-col gap-2 justify-center items-center'}>
+                <div
+                    className={'bg-white w-1/3 h-[26rem] p-8  rounded-lg flex flex-col gap-2 justify-center items-center'}>
 
                     <h1 className={"text-center text-2xl font-semibold"}>پنل مدیریت سرمایه</h1>
                     <div className={"text-center"}>برای ورود لطفا نام کاربری و رمز عبور خود را وارد کنید</div>
                     <div className={"w-11/12 "}>
-                    <div className={'flex flex-col justify-center w-full mb-8'}>
-                        <Input  label="نام کاربری"
-                               labelPlacement="outside" className={"mb-8"}
-                               onChange={(e: any) => setCredentials({...credentials, userName: e.target.value})}/>
-                        <Input type={"password"} label="رمز عبور"
-                               labelPlacement="outside"
-                               onChange={(e: any) => setCredentials({...credentials, password: e.target.value})}/>
+                        <div className={'flex flex-col justify-center w-full mb-8'}>
+                            <Input label="نام کاربری"
+                                   labelPlacement="outside" className={"mb-8"}
+                                   onChange={(e: any) => setCredentials({...credentials, userName: e.target.value})}/>
+                            <Input type={"password"} label="رمز عبور"
+                                   labelPlacement="outside"
+                                   onChange={(e: any) => setCredentials({...credentials, password: e.target.value})}/>
 
-                    </div></div>
+                        </div>
+                    </div>
                     <div className={'flex justify-center w-11/12'}>
 
-                        <Button  onClick={async () => {
+                        <Button isLoading={loading} onClick={async () => {
 
 
                             //         const result = await signIn('credentials', {
@@ -87,7 +90,7 @@ export default function Home() {
                             //
                             // if(result?.ok)  router.push("/identities")
 
-
+                            setLoading(true)
                             const login = await axiosInstance.post("http://localhost:3000/api/auth",
                                 {
                                     "userName": credentials.userName,
@@ -99,10 +102,10 @@ export default function Home() {
                             // const login =   await loginService({userName:credentials.userName ?? "",password:credentials.password ?? ""})
                             if (login.status === 200) {
                                 setCookie("token", login.data.login.data.token);
-                                  setCookie("user", login.data.user);
-                                  router.push(login.data.path ?? "/identities")
-                              }
-
+                                setCookie("user", login.data.user);
+                                router.push(login.data.path ?? "/identities")
+                            }
+                            setLoading(false)
                         }} size={"lg"} className={'w-full'}>ورود</Button>
 
 

@@ -7,6 +7,7 @@ import UsersTable from "@/app/identities/users/users.table";
 import axiosInstance from "@/app/configurations/api/axiosInstance";
 import useSWR from "swr";
 import {Input} from "@nextui-org/input";
+import notFound from "@/app/identities/assets/loading-files.gif";
 
 
 export interface User {
@@ -83,30 +84,69 @@ export default function Forbidden() {
 
     return (
         <div className={` w-full h-full flex flex-col justify-center items-center gap-10 p-12`}>
-            {!users && isLoading ? <p>loading</p> :<>
+            {!users && isLoading ? <p>loading</p> :  <>
 
-                <div
-                    className="flex flex-row justify-between items-center space-x-4 text-small  bg-white w-full h-20 rounded-xl drop-shadow-lg p-4 ">
-                    <div className={"font-black text-3xl  h-full justify-center items-center flex"}>وضعیت کاربران</div>
+                    <div
+                        className="flex flex-row justify-between items-center space-x-4 text-small  bg-white w-full h-20 rounded-xl drop-shadow-lg p-4 ">
+                        <div className={"font-black text-3xl  h-full justify-center items-center flex"}>وضعیت کاربران
+                        </div>
 
-<Input onChange={(e)=>{handleInputChange(e)}} size={"sm"} width={"20%"} label={"جستجو"} className={"w-1/4"} />
-                </div>
+                        <Input onChange={(e) => {
+                            handleInputChange(e)
+                        }} size={"lg"} width={"20%"} placeholder={"جستجو"} className={"w-1/4"} startContent={
+                            <svg
+                                viewBox="0 0 512 512"
+                                fill="currentColor"
+                                height="1.5em"
+                                width="1.5em"
+                            >
+                                <path
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeMiterlimit={10}
+                                    strokeWidth={32}
+                                    d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z"
+                                />
+                                <path
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeMiterlimit={10}
+                                    strokeWidth={32}
+                                    d="M338.29 338.29L448 448"
+                                />
+                            </svg>}/>
+                    </div>
 
-                {users && <UsersTable data={users.data} pagination={{
-                    page,
-            totalPages: users.totalPages,
-            totalItems: users.totalItems,
-            setPage: (page) => {
-                setPage(page)
-            },status,
-                setFilter: (filter) => {
-                    setStatus(filter)
-                },
-                setSearch: (search) => {
-                    setSearch(search)
-                }
-        }}/>
-}
-</>}
+                    { users?.data.length === 0 ?
+                        <div className={"w-full h-full rounded-lg flex flex-col  justify-center items-center bg-white"}>
+
+                            <Image
+                                width={400}
+                                height={100}
+                                className={"max-h-[400px]"}
+                                alt="NextUI Fruit Image with Zoom"
+                                src={notFound.src}
+                            />
+                            <p className={"text-large "}>
+                                کاربری یافت نشد
+                            </p>
+
+                        </div> : users && <UsersTable data={users.data} pagination={{
+                        page,
+                        totalPages: users.totalPages,
+                        totalItems: users.totalItems,
+                        setPage: (page) => {
+                            setPage(page)
+                        }, status,
+                        setFilter: (filter) => {
+                            setStatus(filter)
+                        },
+                        setSearch: (search) => {
+                            setSearch(search)
+                        }
+                    }}/>
+                    }
+                </>}
         </div>)
 }
