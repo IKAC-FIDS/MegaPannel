@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from "react";
+import React, {ReactNode, useMemo, useState} from "react";
 import {
     Table,
     TableHeader,
@@ -79,7 +79,7 @@ interface Props {
 
 
 
-const checkNull = (value: string | number) => {
+const checkNull = (value: string ) => {
     if (value) return value
     return "نامشخص"
 
@@ -115,7 +115,7 @@ const UsersTable = ({data,pagination}: Props) => {
 
 
 
-    const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
+    const renderCell = React.useCallback((user: User, columnKey: React.Key) : ReactNode => {
         const cellValue = user[columnKey as keyof User];
         switch (columnKey) {
 
@@ -145,7 +145,7 @@ const UsersTable = ({data,pagination}: Props) => {
                                 <div className={"flex flex-col w-[30%] gap-10 mt-3"}>
 
                                     <p>مشخصات کاربر</p>
-                                    <Input size={"md"} labelPlacement={"outside"}
+                                    <Input size={"md"}
                                            label="نام و نام خانوادگی" isDisabled
                                            defaultValue={
                                                user.userInfo.name ? user.userInfo.name + " " + user.userInfo?.lastName : "نامشخص"
@@ -195,7 +195,7 @@ const UsersTable = ({data,pagination}: Props) => {
                     </div>
                 );
             default:
-                return cellValue;
+                return <></>;
         }
     }, []);
 

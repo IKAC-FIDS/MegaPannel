@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from "react";
+import React, {ReactNode, useEffect, useMemo, useRef, useState} from "react";
 import {
     Card,
     CardBody,
@@ -331,7 +331,7 @@ const TableComponent = () => {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    const renderCell = React.useCallback((card: Card, columnKey: React.Key) => {
+    const renderCell = React.useCallback((card: Card, columnKey: React.Key) : ReactNode => {
 
         const cellValue = card[columnKey as keyof Card];
 
@@ -481,7 +481,7 @@ const TableComponent = () => {
                     </div>
                 );
             default:
-                return cellValue;
+                return <></>;
         }
     }, []);
 
@@ -746,7 +746,7 @@ const TableComponent = () => {
                     <TableBody items={cardRequests.data}>
                         {(card: Card) => (
                             <TableRow key={card.cardRequest.id}>
-                                {(columnKey) => <TableCell>{renderCell(cardgit, columnKey)}</TableCell>}
+                                {(columnKey) => <TableCell>{renderCell(card, columnKey)}</TableCell>}
                             </TableRow>
                         )}
                     </TableBody>

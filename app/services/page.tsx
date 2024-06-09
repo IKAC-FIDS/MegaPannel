@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import BarChart from "./component/bar_chart";
 import PieChart from "./component/pie_chart";

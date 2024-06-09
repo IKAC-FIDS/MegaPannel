@@ -37,8 +37,11 @@ const Header = () => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const user = JSON.parse(getCookie("user") as string)
+    const userCookie = getCookie("user")
 
+
+    if(!userCookie) return <></>
+    const user = JSON.parse(userCookie)
     return (
         <>
             <Navbar onMenuOpenChange={setIsMenuOpen} isMenuOpen={isMenuOpen} className={"h-20"}
@@ -58,7 +61,7 @@ const Header = () => {
                     </NavbarItem>
 
                     <NavbarItem className={'md:flex hidden'}>
-                        <Badge content="6" shape="circle" color="danger">
+                        <Badge content="0" shape="circle" color="danger">
                             <Button
                                 radius="full"
                                 isIconOnly
@@ -84,7 +87,7 @@ const Header = () => {
                             color={"primary"}
                             defaultSelectedKeys={[dashboards.find((dashboard) => {
                                 return dashboard.route.includes(pathName.split("/")[1])
-                            })?.route]}
+                            })?.route ?? ""]}
 
                         >
                             {(dashboard: dashProps) =>
@@ -106,53 +109,6 @@ const Header = () => {
                         </Select>
                     </NavbarItem>
                 </NavbarContent>
-                {/*<NavbarContent>*/}
-                {/* */}
-                {/*</NavbarContent>*/}
-
-                {/*<NavbarContent className="hidden sm:flex gap-10" justify="center">*/}
-                {/*    <NavbarItem>*/}
-                {/*        <div*/}
-                {/*            className={"w-9 bg-gray-200 hidden md:flex justify-center items-center rounded-full p-1"}>*/}
-                {/*            <Image*/}
-                {/*                src={Settings.src}*/}
-                {/*                alt={"dashboard Logo"}*/}
-                {/*                width={26}*/}
-                {/*                height={26}*/}
-                {/*            />*/}
-                {/*        </div>*/}
-                {/*    </NavbarItem>*/}
-
-                {/*    <NavbarItem>*/}
-
-                {/*        <div*/}
-                {/*            className={*/}
-                {/*                "w-9  bg-gray-200 hidden md:flex justify-center items-center rounded-full p-1"*/}
-                {/*            }*/}
-                {/*        >*/}
-                {/*            <Image*/}
-                {/*                src={Notification.src}*/}
-                {/*                alt={"dashboard Logo"}*/}
-                {/*                width={26}*/}
-                {/*                height={26}*/}
-                {/*            />*/}
-                {/*        </div>*/}
-
-                {/*    </NavbarItem>*/}
-                {/*    <NavbarItem>*/}
-
-
-                {/*        <div>*/}
-                {/*            <Image*/}
-                {/*                src={Person.src}*/}
-                {/*                alt={"dashboard Logo"}*/}
-                {/*                width={50}*/}
-                {/*                height={50}*/}
-                {/*            />*/}
-                {/*        </div>*/}
-
-                {/*    </NavbarItem>*/}
-                {/*</NavbarContent>*/}
 
                 <NavbarMenu className={'pt-10'}>
                     {sideTabs(pathName.split("/")[1]).map((item, index) => (

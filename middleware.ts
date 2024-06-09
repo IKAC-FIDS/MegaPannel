@@ -43,5 +43,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/public_services', '/card','/identities'], // Specify the routes that need this middleware
+    matcher: ['/services', '/card','/identities'], // Specify the routes that need this middleware
 };

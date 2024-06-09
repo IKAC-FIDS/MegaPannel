@@ -39,7 +39,7 @@ export default function RootLayout({
 }>) {
 
     const pathName = usePathname()
-    document.dir = "rtl"
+
     
     return (
         <html lang="fa" dir={'rtl'} className={`${Shabnam_FD.className} `}>

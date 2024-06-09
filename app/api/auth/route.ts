@@ -4,7 +4,7 @@ import loginService from '@/app/auth/login.service';
 import { SignJWT } from 'jose';
 
 const accessList = {
-    full: ["card", "card_operation", "identities", "identities_operation", "public_services"],
+    full: ["card", "card_operation", "identities", "identities_operation", "services"],
     card: ["card", "card_operation"],
     operation: ["card", "identities", "identities_operation"],
 };
@@ -16,14 +16,14 @@ const roles = {
     operation: accessList.operation,
 };
 const users=[
-    {name:"admin",pass:"tes123456",role:roles.main,path:"/card",title:"مدیر سیستم",fullName:null,image:null},
-    {name:"ceo",pass:"tes123456",role:roles.main,path:"/card",title:"مدیر عامل",fullName:"رامبد حیدریان",image:null},
-    {name:"operation",pass:"tes123456",role:roles.operation,path: "/identities",title: "مدیر عملیات",fullName:null},
-    {name:"operation1",pass:"tes123456",role:roles.operation,path: "/identities",title: "کارشناس عملیات 1",fullName:null},
-    {name:"operation2",pass:"tes123456",role:roles.operation,path: "/identities",title: "کارشناس عملیات 2",fullName:null},
-    {name:"card",pass:"tes123456",role:roles.operation,path: "/card",title: "مدیر صدور کارت",fullName:null},
-    {name:"card1",pass:"tes123456",role:roles.operation,path: "/card",title: "کارشناس صدور کارت 1",fullName:null},
-    {name:"card2",pass:"tes123456",role:roles.operation,path: "/card",title: "کارشناس صدور کارت 2",fullName:null},
+    {name:"admin",pass:"Farzad@123@",role:roles.main,path:"/card",title:"مدیر سیستم",fullName:"فرزاد نوروزی فرد",image:null},
+    {name:"ceo",pass:"RH@123@",role:roles.main,path:"/card",title:"مدیر عامل",fullName:"رامبد حیدریان",image:null},
+    {name:"operation",pass:"MA@123@",role:roles.operation,path: "/identities",title: "مدیر عملیات",fullName:"منصور آهاری",image:null},
+    {name:"operation1",pass:"SM@123@",role:roles.operation,path: "/identities",title: "کارشناس عملیات 1",fullName:"سمیه منافی",image:null},
+    {name:"operation2",pass:"ZG@123@",role:roles.operation,path: "/identities",title: "کارشناس عملیات 2",fullName:"زهرا گلیج",image:null},
+    {name:"card",pass:"AS@123@",role:roles.operation,path: "/card",title: "مدیر صدور کارت",fullName:"علی صولت تاش",image:null},
+    {name:"card1",pass:"MG@123@",role:roles.operation,path: "/card",title: "کارشناس صدور کارت 1",fullName:"محمد قربانعلی",image:null},
+    {name:"card2",pass:"FN@123@",role:roles.operation,path: "/card",title: "کارشناس صدور کارت 2",fullName:"فاطمه نیک آیین",image:null},
 
 ]
 const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || 'secretKey');
