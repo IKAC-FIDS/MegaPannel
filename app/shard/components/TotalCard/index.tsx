@@ -1,5 +1,6 @@
 import Image from "next/image";
-import Example from "../../../navbar/assets/images/person.svg"
+// import Example from "../../../navbar/assets/images/person.svg"
+import Example from "@/app/navbar/assets/images/person.png"
 
 const TotalCard = () => {
     return (

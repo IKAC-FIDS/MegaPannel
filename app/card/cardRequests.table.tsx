@@ -144,7 +144,7 @@ const checkStatus = (status: number) => {
 
 }
 
-const checkNull = (value: string | number) => {
+const checkNull = (value: string) => {
 
     if (value) return value
 
@@ -392,7 +392,7 @@ const TableComponent = () => {
 
                             (
                                 <Input type={"number"} className={"text-center w-36 h-9 rounded-none"}
-                                       placeholder={card.cardRequest.trakingCode}
+                                       placeholder={card.cardRequest.trakingCode ?? ""}
                                        onKeyDown={(e: any) => {
 
                                            handlePostNumber(e, card.cardRequest.trakingCode, card.cardRequest.cardNumber, card.cardRequest.id)
@@ -421,7 +421,7 @@ const TableComponent = () => {
                     defaultValue={
                         checkNull(card.userInfo?.name + " " + card.userInfo?.lastName)
 
-                    } labelPlacement="outside" placeholder={""}/>
+                    } placeholder={""}/>
 
              <Input labelPlacement={"outside"} label="کد ملی" isDisabled
                     defaultValue={checkNull(card.userInfo?.nationalCode)}/>
@@ -450,7 +450,7 @@ const TableComponent = () => {
               <div className={"flex gap-5 mb-3"}>
 
              <Input labelPlacement={"outside"} label="شماره کارت" isDisabled
-                    defaultValue={checkNull(card.cardRequest?.cardNumber)} labelPlacement="outside"/>
+                    defaultValue={checkNull(card.cardRequest?.cardNumber)}/>
 
              <Input labelPlacement={"outside"} label="شماره حساب" isDisabled
                     defaultValue={checkNull(card.cardInfo?.accountNumber)}/>
@@ -627,9 +627,9 @@ const TableComponent = () => {
 
                     <div className={"font-black text-3xl md:text-justify text-center"}>لیست کارت های نقدی</div>
                     <div className={'flex items-center flex-row-reverse'}>
-                        <div>      <Input onChange={(e) => {
+                        <div><Input onChange={(e) => {
                             handleInputChange(e)
-                        }} size={"lg"}  placeholder={"جستجو"} className={"w-full"} startContent={
+                        }} size={"lg"} placeholder={"جستجو"} className={"w-full"} startContent={
                             <svg
                                 viewBox="0 0 512 512"
                                 fill="currentColor"
@@ -746,7 +746,7 @@ const TableComponent = () => {
                     <TableBody items={cardRequests.data}>
                         {(card: Card) => (
                             <TableRow key={card.cardRequest.id}>
-                                {(columnKey) => <TableCell>{renderCell(card, columnKey)}</TableCell>}
+                                {(columnKey) => <TableCell>{renderCell(cardgit, columnKey)}</TableCell>}
                             </TableRow>
                         )}
                     </TableBody>
