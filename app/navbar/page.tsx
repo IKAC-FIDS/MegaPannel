@@ -40,7 +40,7 @@ const Header = () => {
     const userCookie = getCookie("user")
 
 
-    if(!userCookie) return <></>
+    if(!userCookie) return (<></>)
     const user = JSON.parse(userCookie)
     return (
         <>

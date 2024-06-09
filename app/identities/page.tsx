@@ -34,7 +34,6 @@ import {
     useDisclosure
 } from "@nextui-org/react";
 import Input from "@/app/shard/components/Input";
-import {CalendarDate} from '@internationalized/date';
 
 import notFound from "./assets/loading-files.gif"
 
@@ -277,7 +276,7 @@ const Identities = () => {
                                     className={"w-full h-3/4 flex items-center justify-center  p-4 gap-4 shadow rounded-lg border-0"}>
 
                                     <video className={"shadow rounded-lg h-full max-w-[380px]"}
-                                           src={request.files.find((file: File) => file.tag === "Aliveness")?.link}
+                                           src={request.files.find((file: File) => file.tag === "Aliveness")?.link.replace("https://digibanking.sbank.ir","http://10.121.254.61:5161/orion/api/v1/internal")}
                                            controls/>
                                     <div className={"w-3/4 h-full flex flex-row gap-2"}>
 
@@ -291,7 +290,7 @@ const Identities = () => {
                                                         height={"450px"}
                                                         className={"h-1/2 w-full cursor-pointer"}
                                                         alt="NextUI Fruit Image with Zoom"
-                                                        src={request.files.find((file: File) => file.tag === "NationalCardFront")?.link}
+                                                        src={request.files.find((file: File) => file.tag === "NationalCardFront")?.link.replace("https://digibanking.sbank.ir","http://10.121.254.61:5161/orion/api/v1/internal")}
                                                     /></Zoom></div>
                                             <div className={"max-w-[450px] max-h-[50%] overflow-hidden rounded-lg"}>
                                                 <Zoom><Image
@@ -300,7 +299,7 @@ const Identities = () => {
                                                     height={"450px"}
                                                     className={"h-1/2 w-full cursor-pointer "}
                                                     alt="NextUI Fruit Image with Zoom"
-                                                    src={request.files.find((file: File) => file.tag === "NationalCardBack")?.link}
+                                                    src={request.files.find((file: File) => file.tag === "NationalCardBack")?.link.replace("https://digibanking.sbank.ir","http://10.121.254.61:5161/orion/api/v1/internal")}
                                                 /> </Zoom>
                                             </div>
 
@@ -354,7 +353,7 @@ const Identities = () => {
                                                 isBlurred
                                                 className={"w-1/4 h-2/3 cursor-pointer"}
                                                 alt="NextUI Fruit Image with Zoom"
-                                                src={request.files.find((file: File) => file.tag === "Signature")?.link}
+                                                src={request.files.find((file: File) => file.tag === "Signature")?.link.replace("https://digibanking.sbank.ir","http://10.121.254.61:5161/orion/api/v1/internal")}
                                             />
 
 

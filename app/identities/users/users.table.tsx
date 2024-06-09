@@ -171,7 +171,7 @@ const UsersTable = ({data,pagination}: Props) => {
                                             height={"300px"}
                                             className={"h-1/2 w-full cursor-pointer"}
                                             alt="NextUI Fruit Image with Zoom"
-                                            src={user.files.find((file) => file.tag === "NationalCardFront")?.link}
+                                            src={user.files.find((file) => file.tag === "NationalCardFront")?.link.replace("https://digibanking.sbank.ir","http://10.121.254.61:5161/orion/api/v1/internal")}
                                         /></div>
                                     <div
                                         className={"max-w-[450px] max-h-[50%] overflow-hidden rounded-lg"}>
@@ -181,13 +181,13 @@ const UsersTable = ({data,pagination}: Props) => {
                                             height={"300px"}
                                             className={"h-1/2 w-full cursor-pointer "}
                                             alt="NextUI Fruit Image with Zoom"
-                                            src={user.files.find((file) => file.tag === "NationalCardBack")?.link}
+                                            src={user.files.find((file) => file.tag === "NationalCardBack")?.link.replace("https://digibanking.sbank.ir","http://10.121.254.61:5161/orion/api/v1/internal")}
                                         />
                                     </div>
 
                                 </div>
                                 <video className={"shadow rounded-lg h-[380px]  max-w-[380px]"}
-                                       src={user.files.find((file) => file.tag === "Aliveness")?.link}
+                                       src={user.files.find((file) => file.tag === "Aliveness")?.link.replace("https://digibanking.sbank.ir","http://10.121.254.61:5161/orion/api/v1/internal")}
                                        controls/>
                             </div>
 

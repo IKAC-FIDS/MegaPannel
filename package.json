@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@internationalized/date": "^3.0.0-nightly.2967",
     "@next/font": "^14.2.3",
     "@nextui-org/react": "^2.3.5",
     "axios": "^1.6.8",

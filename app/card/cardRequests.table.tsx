@@ -35,6 +35,8 @@ import status from "@/app/shard/components/Status";
 import Style from "@/app/shard/components/Input/styles.module.css"
 import SearchInput from "@/app/shard/components/SearchInput";
 import {toast} from "react-toastify";
+import {checkAccess} from "@/app/auth/checkAccess";
+import useAccessCheck from "@/app/shard/hooks/useAccessCheck";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     1: "warning",
@@ -210,7 +212,8 @@ const TableComponent = () => {
         trakingCodeUploadFile: false
     })
 
-
+    const hasAccess = true
+    // const hasAccess = useAccessCheck("card_operation");
     const [loadingList, setLoadingList] = useState<string[]>(["627026f2-67f9-4101-9fd1-29fa47818fa1"])
     let typingTimeout: NodeJS.Timeout | null = null;
     const [trackLoading, setTrackLoading] = useState<boolean>(false);
@@ -388,18 +391,16 @@ const TableComponent = () => {
 
 
                             (
-                                <Input isDisabled={
+                                <Input isDisabled={ !hasAccess ||
                                     !(card.cardRequest.status === 4 || card.cardRequest.status === 9)}
                                        type={"number"}
                                        className={"text-center w-36 h-9 rounded-none"}
                                        placeholder={card.cardRequest.trakingCode ?? ""}
                                        onKeyDown={(e: any) => {
-
                                            handlePostNumber(e, card.cardRequest.trakingCode, card.cardRequest.cardNumber, card.cardRequest.id)
                                        }}
 
                                 />)
-
                         }
 
                     </div>
@@ -653,23 +654,24 @@ const TableComponent = () => {
                                 />
                             </svg>}/></div>
 
-                        <div className={'h-10 border mx-6'}></div>
+                        {hasAccess && <><div className={'h-10 border mx-6'}></div>
 
-                        <div className={'flex'}>
-                            <Image src={Excel.src} alt={"search"} width={30} height={30}/>
-                            <Button variant={'light'} isLoading={loading?.cardRequestExcel} onClick={() => {
-                                cardRequestExcel()
-                            }}>دریافت فایل اکسل</Button>
-                        </div>
+                            <div className={'flex'}>
+                        <Image src={Excel.src} alt={"search"} width={30} height={30}/>
+                        <Button variant={'light'} isLoading={loading?.cardRequestExcel} onClick={() => {
+                            cardRequestExcel()
+                        }}>دریافت فایل اکسل</Button>
+                    </div>
 
-                        <div className={'h-10 border'}></div>
+                    <div className={'h-10 border'}></div>
 
-                        <div className={'flex gap-3'}>
-                            <Image src={Print.src} alt={"search"} width={24} height={24}/>
-                            <Button variant={'light'} isLoading={loading?.updateExpectedCardRequests} onClick={() => {
-                                updateExpectedCardRequests()
-                            }}>تایید چاپ</Button>
-                        </div>
+                    <div className={'flex gap-3'}>
+                        <Image src={Print.src} alt={"search"} width={24} height={24}/>
+                        <Button variant={'light'} isLoading={loading?.updateExpectedCardRequests} onClick={() => {
+                            updateExpectedCardRequests()
+                        }}>تایید چاپ</Button>
+                    </div></>
+                    }
                         {/*<div className={'h-10 border'}></div>*/}
                         <input
                             type="file"
@@ -715,7 +717,7 @@ const TableComponent = () => {
                                                         </SelectItem>
                                                     ))}
                                                 </Select> </> :
-                                            column.uid === "postNumber" ?
+                                            column.uid === "postNumber" && hasAccess ?
 
                                                 <div className={"flex items-center"}>
 

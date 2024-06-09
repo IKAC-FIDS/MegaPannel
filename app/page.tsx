@@ -101,7 +101,8 @@ export default function Home() {
 
                             // const login =   await loginService({userName:credentials.userName ?? "",password:credentials.password ?? ""})
                             if (login.status === 200) {
-                                setCookie("token", login.data.login.data.token);
+                                setCookie("accessToken",login.data.accessToken)
+                                setCookie("token", login.data.login.token);
                                 setCookie("user", login.data.user);
                                 router.push(login.data.path ?? "/identities")
                             }

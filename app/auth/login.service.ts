@@ -5,13 +5,12 @@ import {setCookie} from "cookies-next";
 
 const secretKey = process.env.encryptSecretKey
 
-// `http://192.168.70.119:5246/api/secure`,
 const loginService = async (credentials: {
     userName: string;
     password: string;
 }): Promise<AxiosResponse> => {
     const response = await axiosInstance.post(
-        `https://digibanking.sbank.ir/authenticate`,
+        `http://192.168.67.17:1002/api/v1/authenticate`,
         {
             username: credentials.userName,
             password: credentials.password,
@@ -28,7 +27,7 @@ const loginService = async (credentials: {
         const {
             token,
             refreshToken,
-        } = response.data.data;
+        } = response.data;
         setCookie("token",token)
         setCookie("refreshToken",refreshToken)
     }

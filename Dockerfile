@@ -15,11 +15,13 @@ RUN npm install -g npm@10.1.0
 RUN npm fund
 RUN npm install
 
+#COPY node_modules ./
+
 # Copy the rest of the application code to the working directory
 COPY . .
 
 # Build the application
-ENV BUILD_STANDALONE true
+#ENV BUILD_STANDALONE true
 RUN npm run build
 
 # Expose port 443
