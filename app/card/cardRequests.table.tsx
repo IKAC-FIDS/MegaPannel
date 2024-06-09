@@ -34,6 +34,7 @@ import Button from "@/app/shard/components/Button";
 import status from "@/app/shard/components/Status";
 import Style from "@/app/shard/components/Input/styles.module.css"
 import SearchInput from "@/app/shard/components/SearchInput";
+import {toast} from "react-toastify";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     1: "warning",
@@ -290,9 +291,11 @@ const TableComponent = () => {
         setLoading({...loading, updateExpectedCardRequests: true})
         const response = await axiosInstance.post(`http://192.168.106.7:7040/api/update-expected-card-requests`)
         if (response.status === 200) {
-            setLoading({...loading, updateExpectedCardRequests: false})
+            toast.success("تایید چاپ با موفقیت انجام شد")
+        } else {
+            toast.error("خطا")
         }
-
+        setLoading({...loading, updateExpectedCardRequests: false})
 
     }
 
@@ -314,24 +317,19 @@ const TableComponent = () => {
             const link = document.createElement('a');
             link.href = URL.createObjectURL(fileBlob);
             link.download = defaultFileName;
-
             document.body.appendChild(link);
-
             link.click();
-
             link.parentNode?.removeChild(link);
 
-        } else if (response.status !== 200) {
-            setLoading({...loading, cardRequestExcel: true})
-
         }
+        setLoading({...loading, cardRequestExcel: false})
     }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    const renderCell = React.useCallback((card: Card, columnKey: React.Key) : ReactNode => {
+    const renderCell = React.useCallback((card: Card, columnKey: React.Key): ReactNode => {
 
         const cellValue = card[columnKey as keyof Card];
 
@@ -384,14 +382,16 @@ const TableComponent = () => {
             case "postNumber":
                 return (
                     <div>
-
                         {
 
                             // loadingList.includes(card.cardRequest.id) ? <Spinner/> :
 
 
                             (
-                                <Input type={"number"} className={"text-center w-36 h-9 rounded-none"}
+                                <Input isDisabled={
+                                    !(card.cardRequest.status === 4 || card.cardRequest.status === 9)}
+                                       type={"number"}
+                                       className={"text-center w-36 h-9 rounded-none"}
                                        placeholder={card.cardRequest.trakingCode ?? ""}
                                        onKeyDown={(e: any) => {
 
