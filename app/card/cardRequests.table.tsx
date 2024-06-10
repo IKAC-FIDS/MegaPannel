@@ -132,7 +132,7 @@ const getCardRequests = async (currentPage: number, status: number, filter: stri
     const statusCode = status ? `&status=${status}` : ""
 
     const response = await axiosInstance.get(
-        `http://192.168.106.7:7040/api/card-requests?currentPage=${currentPage}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
+        `http://192.168.67.17:4500/api/card-requests?currentPage=${currentPage}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
     );
     if (response.status === 200) {
         return response.data
@@ -222,7 +222,7 @@ const TableComponent = () => {
         data: cardRequests,
         isValidating,
         isLoading
-    } = useSWR(`http://192.168.106.7:7040/api/card-requests?page=${page}&status=${selectedStatus}&filter=${filter}`
+    } = useSWR(`http://192.168.67.17:4500/api/card-requests?page=${page}&status=${selectedStatus}&filter=${filter}`
         , async () => await getCardRequests(page, selectedStatus, filter), {keepPreviousData: true,});
 
 
@@ -233,7 +233,7 @@ const TableComponent = () => {
 
 
     const updateTrakingCode = async (cardNumber: string, trakingCode: string) => {
-        const response = await axiosInstance.post(`http://192.168.106.7:7040/api/update-traking-code`,
+        const response = await axiosInstance.post(`http://192.168.67.17:4500/api/update-traking-code`,
             {
                 cardNumber: cardNumber,
                 trakingCode: trakingCode
@@ -248,7 +248,7 @@ const TableComponent = () => {
         setTrackLoading(true);
         console.log(trackLoading)
         try {
-            const response = await axiosInstance.post(`http://192.168.106.7:7040/api/insert-traking-code`, {
+            const response = await axiosInstance.post(`http://192.168.67.17:4500/api/insert-traking-code`, {
                 cardNumber: cardNumber,
                 trakingCode: trakingCode
             });
@@ -292,7 +292,7 @@ const TableComponent = () => {
 
     const updateExpectedCardRequests = async () => {
         setLoading({...loading, updateExpectedCardRequests: true})
-        const response = await axiosInstance.post(`http://192.168.106.7:7040/api/update-expected-card-requests`)
+        const response = await axiosInstance.post(`http://192.168.67.17:4500/api/update-expected-card-requests`)
         if (response.status === 200) {
             toast.success("تایید چاپ با موفقیت انجام شد")
         } else {
@@ -305,7 +305,7 @@ const TableComponent = () => {
 
     const cardRequestExcel = async (): Promise<void> => {
         setLoading({...loading, cardRequestExcel: true})
-        const response = await axiosInstance.get<Blob>(`http://192.168.106.7:7040/api/card-request-excel`, {responseType: 'arraybuffer'})
+        const response = await axiosInstance.get<Blob>(`http://192.168.67.17:4500/api/card-request-excel`, {responseType: 'arraybuffer'})
 
         // if (!response.data || response.data.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
         //     throw new Error('The downloaded file is not a valid Excel file.');
@@ -391,7 +391,7 @@ const TableComponent = () => {
 
 
                             (
-                                <Input isDisabled={ !hasAccess ||
+                                <Input isDisabled={!hasAccess ||
                                     !(card.cardRequest.status === 4 || card.cardRequest.status === 9)}
                                        type={"number"}
                                        className={"text-center w-36 h-9 rounded-none"}
@@ -573,7 +573,7 @@ const TableComponent = () => {
             formData.append('file', event.target.files[0]);
 
 
-            const response = await AxiosInstance.post("http://192.168.106.7:7040/api/traking-code-upload-file", formData, {
+            const response = await AxiosInstance.post("http://192.168.67.17:4500/api/traking-code-upload-file", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -654,24 +654,27 @@ const TableComponent = () => {
                                 />
                             </svg>}/></div>
 
-                        {hasAccess && <><div className={'h-10 border mx-6'}></div>
+                        {hasAccess && <>
+                            <div className={'h-10 border mx-6'}></div>
 
                             <div className={'flex'}>
-                        <Image src={Excel.src} alt={"search"} width={30} height={30}/>
-                        <Button variant={'light'} isLoading={loading?.cardRequestExcel} onClick={() => {
-                            cardRequestExcel()
-                        }}>دریافت فایل اکسل</Button>
-                    </div>
+                                <Image src={Excel.src} alt={"search"} width={30} height={30}/>
+                                <Button variant={'light'} isLoading={loading?.cardRequestExcel} onClick={() => {
+                                    cardRequestExcel()
+                                }}>دریافت فایل اکسل</Button>
+                            </div>
 
-                    <div className={'h-10 border'}></div>
+                            <div className={'h-10 border'}></div>
 
-                    <div className={'flex gap-3'}>
-                        <Image src={Print.src} alt={"search"} width={24} height={24}/>
-                        <Button variant={'light'} isLoading={loading?.updateExpectedCardRequests} onClick={() => {
-                            updateExpectedCardRequests()
-                        }}>تایید چاپ</Button>
-                    </div></>
-                    }
+                            <div className={'flex gap-3'}>
+                                <Image src={Print.src} alt={"search"} width={24} height={24}/>
+                                <Button variant={'light'} isLoading={loading?.updateExpectedCardRequests}
+                                        onClick={() => {
+                                            updateExpectedCardRequests()
+                                        }}>تایید چاپ</Button>
+                            </div>
+                        </>
+                        }
                         {/*<div className={'h-10 border'}></div>*/}
                         <input
                             type="file"
