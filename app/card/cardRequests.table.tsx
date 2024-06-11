@@ -212,8 +212,8 @@ const TableComponent = () => {
         trakingCodeUploadFile: false
     })
 
-    const hasAccess = true
-    // const hasAccess = useAccessCheck("card_operation");
+    // const hasAccess = true
+    const hasAccess = useAccessCheck("card_operation");
     const [loadingList, setLoadingList] = useState<string[]>(["627026f2-67f9-4101-9fd1-29fa47818fa1"])
     let typingTimeout: NodeJS.Timeout | null = null;
     const [trackLoading, setTrackLoading] = useState<boolean>(false);

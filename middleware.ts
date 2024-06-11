@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify, JWTVerifyResult } from 'jose';
 
-const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || 'secretKey');
+const secretKey = new TextEncoder().encode(process.env.JWT_SECRET);
 
 interface DecodedToken {
     role: string[];

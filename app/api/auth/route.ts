@@ -2,6 +2,7 @@
 import {NextRequest} from 'next/server';
 import loginService from '@/app/auth/login.service';
 import {SignJWT} from 'jose';
+import {log} from "node:util";
 
 const accessList = {
     full: ["card", "card_operation", "identities", "identities_operation", "services"],
@@ -90,13 +91,17 @@ const users = [
     },
 
 ]
-const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || 'secretKey');
+const secretKey =  new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function POST(request: NextRequest) {
+
+
     try {
         const body = await request.json();
         const user = users.find((user) => user.name === body.userName && user.pass === body.password);
         const login = await loginService(user ? {userName: "s.kalami", password: "12345678"} : body);
+
+
 
         if (login.status !== 200) {
             return new Response(JSON.stringify({success: login.data}), {
@@ -109,8 +114,9 @@ export async function POST(request: NextRequest) {
 
         const accessToken = await new SignJWT({userName: body.userName, role: user?.role})
             .setProtectedHeader({alg: 'HS256'})
-            .setExpirationTime('1h')
+            .setExpirationTime('9h')
             .sign(secretKey);
+
 
         return new Response(JSON.stringify({
             login: login.data,
@@ -126,6 +132,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
+        console.log(error)
         return new Response(JSON.stringify({error: "Invalid request body"}), {
             status: 400,
             headers: {

@@ -3,7 +3,7 @@ import axiosInstance from "@/app/configurations/api/axiosInstance";
 import {setCookie} from "cookies-next";
 
 
-const secretKey = process.env.encryptSecretKey
+
 
 const loginService = async (credentials: {
     userName: string;
@@ -20,8 +20,6 @@ const loginService = async (credentials: {
             }
         }
     );
-
-
 
     if (response.status === 200) {
         const {

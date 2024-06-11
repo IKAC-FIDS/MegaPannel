@@ -3,6 +3,9 @@
 /** @type {import('next').NextConfig} */
 
 export default {
+    env: {
+        JWT_SECRET: 'my-value',
+    },
     async headers() {
         return [
             {

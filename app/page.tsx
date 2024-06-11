@@ -82,7 +82,7 @@ export default function Home() {
 
 
                             //         const result = await signIn('credentials', {
-                            //             redirect: false, // Prevent automatic redirection
+                            //             redirect: false, // Prevent automatic redirection0
                             //             userName:credentials.userName,
                             //             password:credentials.password,
                             //         });
@@ -91,6 +91,7 @@ export default function Home() {
                             // if(result?.ok)  router.push("/identities")
 
                             setLoading(true)
+                            console.log("1")
                             const login = await axiosInstance.post("http://localhost:4000/api/auth",
                                 {
                                     "userName": credentials.userName,
@@ -103,6 +104,7 @@ export default function Home() {
                             if (login.status === 200) {
                                 setCookie("accessToken",login.data.accessToken)
                                 setCookie("token", login.data.login.token);
+                                setCookie("refreshToken",login.data.login.refreshToken)
                                 setCookie("user", login.data.user);
                                 router.push(login.data.path ?? "/identities")
                             }
