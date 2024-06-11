@@ -1,4 +1,4 @@
-import React, {ReactNode, useEffect, useMemo, useRef, useState} from "react";
+import React, {ReactNode, useRef, useState} from "react";
 import {
     Card,
     CardBody,
@@ -7,7 +7,7 @@ import {
     Divider,
     Pagination,
     Select,
-    SelectItem, Spinner,
+    SelectItem,
     Tab,
     Table,
     TableBody,
@@ -23,20 +23,15 @@ import {utcToShamsi} from "@/app/shard/utils/utcToShamsi";
 import Input from "@/app/shard/components/Input";
 import axiosInstance from "@/app/configurations/api/axiosInstance";
 import AxiosInstance from "@/app/configurations/api/axiosInstance";
-import useSWR from "swr";
 import Image from "next/image";
-import SearchIcon from "@/app/shard/assets/icons/searchicon.svg"
 import Print from "@/app/card/assets/icons/Print.svg"
 import Excel from "@/app/card/assets/icons/excel.svg"
 import Post from "@/app/card/assets/icons/post.svg"
 import More from "@/app/card/assets/icons/more.svg"
 import Button from "@/app/shard/components/Button";
-import status from "@/app/shard/components/Status";
-import Style from "@/app/shard/components/Input/styles.module.css"
-import SearchInput from "@/app/shard/components/SearchInput";
+
 import {toast} from "react-toastify";
-import {checkAccess} from "@/app/auth/checkAccess";
-import useAccessCheck from "@/app/shard/hooks/useAccessCheck";
+
 import {
     CardInfo,
     CardRequest,
@@ -46,6 +41,8 @@ import {
     unDoneRecords,
     UserInfo
 } from "@/app/card/page";
+import {log} from "node:util";
+import useSWR from "swr";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     1: "warning",
@@ -143,9 +140,13 @@ export const statusList = [
 
 
 const TableComponent = ({cardRequest, pagination}: TableProps) => {
-
+    let typingTimeout: NodeJS.Timeout | null = null;
     const hasAccess = true
+
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+
     const [loading, setLoading] = useState<LoadingProps>({
         cardRequestExcel: false,
         updateExpectedCardRequests: false,
@@ -153,9 +154,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
         updateTrakingCode: false,
         trakingCodeUploadFile: false
     })
-
     const [loadingList, setLoadingList] = useState<string[]>(["627026f2-67f9-4101-9fd1-29fa47818fa1"])
-    let typingTimeout: NodeJS.Timeout | null = null;
 
 
     const updateTrakingCode = async (cardNumber: string, trakingCode: string) => {
@@ -290,6 +289,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
         fileInputRef.current?.click();
     };
 
+
     const bottomContent = React.useMemo(() => {
         return (
             <div className={'flex justify-between items-center mb-20 flex-col md:flex-row '}>
@@ -303,7 +303,9 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
                                     className={'font-normal text-zinc-500'}> {checkStatus(Number(key)) + " " + ':'}</div>
                                 <div>{" " + value}</div>
                             </div>
-                            <Divider orientation="vertical"/></>
+                            <Divider orientation="vertical"/>
+
+                        </>
 
                     ))}
 
@@ -553,7 +555,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
                 </div>
 
                 <Table
-
+                    className={"min-h-full"}
                     bottomContent={
                         pagination.total > 0 ? bottomContent : null
                     }

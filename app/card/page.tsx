@@ -5,6 +5,8 @@ import TableComponent, {statusList} from "@/app/card/cardRequests.table";
 import useSWR from "swr";
 import React, {useMemo, useState} from "react";
 import axiosInstance from "@/app/configurations/api/axiosInstance";
+import Button from "@/app/shard/components/Button";
+
 
 export interface StatusStatistics {
     '1': number;
@@ -99,7 +101,7 @@ const CardPanel = () => {
         const statusCode = status ? `&status=${status}` : ""
 
         const response = await axiosInstance.get(
-            `http://192.168.106.6:4500/api/card-requests?currentPage=${currentPage}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
+            `http://192.168.106.6:4500/api/card-requests?currentPage=${currentPage ? currentPage : ""}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
         );
         if (response.status === 200) {
             return response.data
@@ -123,7 +125,8 @@ const CardPanel = () => {
     if (!cardRequests) return (<p>loading</p>)
     return (
         <>
-            <div className={"p-3"}>
+            <div className={"p-3 h-screen"}>
+
                 <TableComponent
                     cardRequest={cardRequests.data}
                     pagination={{
@@ -141,11 +144,10 @@ const CardPanel = () => {
                         },
                         page,
                         selectedStatus,
-                        StatusStatistics: cardRequests.StatusStatistics
+                        StatusStatistics: cardRequests?.statusStatistics
                     }}
-
-
                 />
+
             </div>
 
         </>
