@@ -1,4 +1,4 @@
-import React, {ReactNode, useEffect, useMemo, useRef, useState} from "react";
+import React, {ReactNode, useRef, useState} from "react";
 import {
     Card,
     CardBody,
@@ -7,7 +7,7 @@ import {
     Divider,
     Pagination,
     Select,
-    SelectItem, Spinner,
+    SelectItem,
     Tab,
     Table,
     TableBody,
@@ -23,20 +23,26 @@ import {utcToShamsi} from "@/app/shard/utils/utcToShamsi";
 import Input from "@/app/shard/components/Input";
 import axiosInstance from "@/app/configurations/api/axiosInstance";
 import AxiosInstance from "@/app/configurations/api/axiosInstance";
-import useSWR from "swr";
 import Image from "next/image";
-import SearchIcon from "@/app/shard/assets/icons/searchicon.svg"
 import Print from "@/app/card/assets/icons/Print.svg"
 import Excel from "@/app/card/assets/icons/excel.svg"
-import Post from "@/app/card/assets/icons/post.svg"
+import PostIcon from "@/app/card/assets/icons/post.svg"
 import More from "@/app/card/assets/icons/more.svg"
 import Button from "@/app/shard/components/Button";
-import status from "@/app/shard/components/Status";
-import Style from "@/app/shard/components/Input/styles.module.css"
-import SearchInput from "@/app/shard/components/SearchInput";
+
 import {toast} from "react-toastify";
-import {checkAccess} from "@/app/auth/checkAccess";
-import useAccessCheck from "@/app/shard/hooks/useAccessCheck";
+
+import {
+    CardInfo,
+    CardRequest,
+    CardTemplateInfo,
+    LoadingProps,
+    StatusStatistics,
+    unDoneRecords,
+    UserInfo
+} from "@/app/card/page";
+import {log} from "node:util";
+import useSWR from "swr";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     1: "warning",
@@ -52,91 +58,26 @@ interface Card {
     userInfo: UserInfo;
     cardInfo: CardInfo;
     cardTemplateInfo: CardTemplateInfo;
+    StatusStatistics: StatusStatistics
+
 }
 
-interface CardTemplateInfo {
-    name: string;
-    title: string;
-    code: string;
-    color: string;
-    image: string;
-    disabled: boolean;
-    order: number;
-    inventory: number;
-}
 
-interface CardInfo {
-    number: string;
-    cvv2: string;
-    track1: string;
-    track2: string;
-    track3: string;
-    bankTypeExpireDate: string;
-    expireDateUtc: string;
-    disabled: boolean;
-    disabledDateUtc?: any;
-    terminated: boolean;
-    terminatedDateUtc?: any;
-    createdDateUtc: string;
-    templateId: string;
-    userId: string;
-    accountNumber: string;
-}
+interface TableProps {
 
-interface UserInfo {
-    nationalCode: string;
-    phoneNumber: string;
-    birthdate: string;
-    bookNumber: number;
-    name: string;
-    lastName: string;
-    fatherName: string;
-    gender: string;
-    officeCode: string;
-    officeName: string;
-    nationalNumber: string;
-    nationalSeri: string;
-    nationalSerial: string;
-    cardSerial: string;
-}
+    cardRequest: Card[],
 
-interface CardRequest {
-    id: string;
-    cardTemplateId: string;
-    userId: string;
-    status: number;
-    message?: any;
-    createdDateUtc: string;
-    address: string;
-    sameCardNumber: boolean;
-    accountNumber: string;
-    cardNumber: string;
-    trakingCode: string | null;
-}
-
-interface unDoneRecords {
-    cardNumber: string;
-    trakingCode: string;
-    status: number;
-}
-
-interface LoadingProps {
-    cardRequestExcel?: boolean;
-    updateExpectedCardRequests?: boolean;
-    insertTrakingCode?: boolean;
-    updateTrakingCode?: boolean;
-    trakingCodeUploadFile?: boolean;
-}
-
-const getCardRequests = async (currentPage: number, status: number, filter: string) => {
-    const statusCode = status ? `&status=${status}` : ""
-
-    const response = await axiosInstance.get(
-        `http://192.168.106.7:7040/api/card-requests?currentPage=${currentPage}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
-    );
-    if (response.status === 200) {
-        return response.data
-    } else return []
+    pagination: {
+        currentPage: number,
+        totalPageCount: number,
+        total: number,
+        page: number,
+        selectedStatus: number,
+        setPage: (page: number) => void,
+        setSelectedStatus: (status: number) => void,
+        setFilter: (filter: string) => void,
+        StatusStatistics: StatusStatistics,
+    }
 
 }
 
@@ -155,7 +96,7 @@ const checkNull = (value: string) => {
 
 }
 
-const statusList = [
+export const statusList = [
     {
         id: 0,
         label: "همه"
@@ -198,12 +139,14 @@ const statusList = [
 ]
 
 
-const TableComponent = () => {
+const TableComponent = ({cardRequest, pagination}: TableProps) => {
+    let typingTimeout: NodeJS.Timeout | null = null;
+    const hasAccess = true
+
 
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [selectedStatus, setSelectedStatus] = useState<number>(0)
-    const [filter, setFilter] = useState<string>("")
-    const [page, setPage] = useState(1);
+
+
     const [loading, setLoading] = useState<LoadingProps>({
         cardRequestExcel: false,
         updateExpectedCardRequests: false,
@@ -211,88 +154,66 @@ const TableComponent = () => {
         updateTrakingCode: false,
         trakingCodeUploadFile: false
     })
-
-    // const hasAccess = true
-    const hasAccess = useAccessCheck("card_operation");
     const [loadingList, setLoadingList] = useState<string[]>(["627026f2-67f9-4101-9fd1-29fa47818fa1"])
-    let typingTimeout: NodeJS.Timeout | null = null;
-    const [trackLoading, setTrackLoading] = useState<boolean>(false);
-
-    const {
-        data: cardRequests,
-        isValidating,
-        isLoading
-    } = useSWR(`http://192.168.106.7:7040/api/card-requests?page=${page}&status=${selectedStatus}&filter=${filter}`
-        , async () => await getCardRequests(page, selectedStatus, filter), {keepPreviousData: true,});
-
-
-    const rowsPerPage = 10;
-    const pages = useMemo(() => {
-        return cardRequests?.totalPageCount ? Math.ceil(cardRequests.totalPageCount) : 0;
-    }, [cardRequests?.totalPageCount, rowsPerPage]);
 
 
     const updateTrakingCode = async (cardNumber: string, trakingCode: string) => {
-        const response = await axiosInstance.post(`http://192.168.106.7:7040/api/update-traking-code`,
+        const response = await axiosInstance.post(`http://192.168.106.6:4500/api/update-traking-code`,
             {
                 cardNumber: cardNumber,
                 trakingCode: trakingCode
             })
         if (response.status === 200) {
             return response.data
-        } else return []
+        } else {
+            toast.error("خطا")
+            return []
+        }
     }
 
-
     const insertTrakingCode = async (cardNumber: string, trakingCode: string) => {
-        setTrackLoading(true);
-        console.log(trackLoading)
+
+
         try {
-            const response = await axiosInstance.post(`http://192.168.106.7:7040/api/insert-traking-code`, {
+            const response = await axiosInstance.post(`http://192.168.106.6:4500/api/insert-traking-code`, {
                 cardNumber: cardNumber,
                 trakingCode: trakingCode
             });
             if (response.status === 200) {
-                setTrackLoading(false);
-                console.log(trackLoading)
+
+
                 return response.data;
             } else {
-                setTrackLoading(false);
+                toast.error("خطا")
                 return [];
             }
         } catch (error) {
-            setTrackLoading(false);
-            console.error(error);
+
+
             return [];
         }
     };
 
-
     const handlePostNumber = async (e: any, trakingCode: string | null, cardNumber: string, id: string) => {
-            if (e.key === "Enter") {
-                setLoadingList([...loadingList, id]);
-                if (trakingCode === null) {
-                    await insertTrakingCode(cardNumber, e.target.value)
-                } else {
-                    console.log("ridife")
-                    await updateTrakingCode(cardNumber, e.target.value)
-                }
+        if (e.key === "Enter") {
+            setLoadingList([...loadingList, id]);
+            if (trakingCode === null) {
+                await insertTrakingCode(cardNumber, e.target.value)
+            } else {
 
-                setLoadingList(loadingList.filter(item =>
-                    item !== id))
-
-
+                await updateTrakingCode(cardNumber, e.target.value)
             }
+
+            setLoadingList(loadingList.filter(item =>
+                item !== id))
+
+
         }
-    ;
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
+    };
 
     const updateExpectedCardRequests = async () => {
         setLoading({...loading, updateExpectedCardRequests: true})
-        const response = await axiosInstance.post(`http://192.168.106.7:7040/api/update-expected-card-requests`)
+        const response = await axiosInstance.post(`http://192.168.106.6:4500/api/update-expected-card-requests`)
         if (response.status === 200) {
             toast.success("تایید چاپ با موفقیت انجام شد")
         } else {
@@ -302,14 +223,10 @@ const TableComponent = () => {
 
     }
 
-
     const cardRequestExcel = async (): Promise<void> => {
         setLoading({...loading, cardRequestExcel: true})
-        const response = await axiosInstance.get<Blob>(`http://192.168.106.7:7040/api/card-request-excel`, {responseType: 'arraybuffer'})
 
-        // if (!response.data || response.data.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-        //     throw new Error('The downloaded file is not a valid Excel file.');
-        // }
+        const response = await axiosInstance.get<Blob>(`http://192.168.106.6:4500/api/card-request-excel`, {responseType: 'arraybuffer'})
 
         if (response.status === 200) {
             setLoading({...loading, cardRequestExcel: false})
@@ -324,13 +241,104 @@ const TableComponent = () => {
             link.click();
             link.parentNode?.removeChild(link);
 
+        } else if (response.status !== 200) {
+            toast.error("لطفا کاربران رو تایید کنید ")
         }
         setLoading({...loading, cardRequestExcel: false})
     }
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (typingTimeout) {
+            clearTimeout(typingTimeout);
+        }
+        typingTimeout = setTimeout(() => {
+            if (value.length >= 3 || !value.length) pagination.setFilter(value)
+        }, 500);
+    };
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    const TrakingCodeUploadFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
 
+            const formData = new FormData();
+            formData.append('file', event.target.files[0]);
+
+            const response = await AxiosInstance.post("http://192.168.106.6:4500/api/traking-code-upload-file", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            if (response.status === 200) {
+
+                if (response.data.hasFailedRecords) {
+                    response.data.unDoneRecords.map((items: unDoneRecords, index: number) => {
+                        if (items.status === 0) {
+                            // toast.error("CardNumberNotFound")
+                            toast.error("شماره کارت کاربر پیدا نشد")
+                        } else if (items.status === 1) {
+                            // toast.error("WrongTrakingCodePattern")
+                            toast.error("الگوی کد رهگیری اشتباه")
+                        } else if (items.status === 2) {
+                            // toast.error("OneElementsIsEmpty")
+                            toast.error("یک عنصر خالی است")
+                        } else if (items.status === 3) {
+                            toast.error("InistalStatusIsNotCorrect")
+                        }
+                    })
+                }
+            } else if (response.status !== 200) toast.error("خطای سیستمی")
+        }
+
+
+    };
+
+
+    const handleButtonClick = () => {
+        fileInputRef.current?.click();
+    };
+
+
+    const bottomContent = React.useMemo(() => {
+        return (
+            <div className={'flex justify-between items-center mb-20 flex-col md:flex-row '}>
+
+                <div className="flex gap-1 w-full h-10 mb-28 md:mb-0 flex-wrap md:flex-nowrap">
+                    {pagination.StatusStatistics && Object.entries(pagination.StatusStatistics).map(([key, value]) => (
+
+                        <>
+                            <div key={key} className={"flex justify-between gap-1 items-center"}>
+                                <div
+                                    className={'font-normal text-zinc-500'}> {checkStatus(Number(key)) + " " + ':'}</div>
+                                <div>{" " + value}</div>
+                            </div>
+                            <Divider orientation="vertical"/>
+
+                        </>
+
+                    ))}
+
+                </div>
+
+
+                <div className="flex w-full " style={{direction: "ltr"}}>
+                    <Pagination
+                        isCompact
+                        showControls
+                        showShadow
+                        color="primary"
+                        page={pagination.page}
+                        total={pagination.total}
+                        onChange={(page) => {
+                            pagination.setPage(page)
+                            console.log(page)
+                        }}
+                    />
+                </div>
+
+            </div>
+        );
+    }, [pagination.StatusStatistics]);
 
     const renderCell = React.useCallback((card: Card, columnKey: React.Key): ReactNode => {
 
@@ -387,11 +395,9 @@ const TableComponent = () => {
                     <div>
                         {
 
-                            // loadingList.includes(card.cardRequest.id) ? <Spinner/> :
-
 
                             (
-                                <Input isDisabled={ !hasAccess ||
+                                <Input isDisabled={!hasAccess ||
                                     !(card.cardRequest.status === 4 || card.cardRequest.status === 9)}
                                        type={"number"}
                                        className={"text-center w-36 h-9 rounded-none"}
@@ -487,192 +493,71 @@ const TableComponent = () => {
     }, []);
 
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        if (typingTimeout) {
-            clearTimeout(typingTimeout);
-        }
-        typingTimeout = setTimeout(() => {
-            if (value.length >= 3 || !value.length) setFilter(value)
-        }, 500);
-    };
-
-
-    const bottomContent = React.useMemo(() => {
-        return (
-            <div className={'flex justify-between items-center mb-20 flex-col md:flex-row '}>
-                <div className="flex gap-2 w-full h-10 mb-28 md:mb-0 flex-wrap md:flex-nowrap">
-                    {cardRequests?.statusStatistics && Object.entries(cardRequests.statusStatistics).map(([key, value]) => (
-
-                        <>
-                            <div key={key} className={"flex justify-between gap-1 items-center"}>
-                                <div
-                                    className={'font-normal text-zinc-500'}> {checkStatus(Number(key)) + " " + ':'}</div>
-                                <div>{" " + value}</div>
-                            </div>
-                            <Divider orientation="vertical"/></>
-
-                    ))}
-
-                </div>
-                <div className="flex w-full " style={{direction: "ltr"}}>
-                    <Pagination
-                        isCompact
-                        showControls
-                        showShadow
-
-                        color="primary"
-                        page={page}
-                        total={pages}
-                        onChange={(page) => setPage(page)}
-                    />
-                </div>
-
-
-            </div>
-        );
-    }, [cardRequests?.statusStatistics]);
-
-    ////////////////////////////
-    // const topContent = React.useMemo(() => {
-    //     return (
-    //         <>
-    //             <div className={"rounded-full w-64 h-12 hidden md:flex items-center justify-center"}>
-    //                 <Input onChange={handleInputChange} className={"rounded-full"} size={"lg"}
-    //                        labelPlacement={"outside-left"} placeholder="جستو وجو"/>
-    //             </div>
-    //             <div>
-    //                 { Object.entries(cardRequests.statusStatistics).forEach(([key, value]) => {
-    //                             return(<>       <Chip
-    //
-    //                                 variant="flat">
-    //                                 {
-    //                                     checkStatus(key)
-    //                                 }
-    //
-    //                             </Chip></>)
-    //
-    //                 });}
-    //             </div>
-    //         </>
-    //
-    //
-    //     )
-    // })
-    ///////////////////////////
-
-
-    const TrakingCodeUploadFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
-
-
-        if (event.target.files) {
-            // setTrackLoading(true)
-
-
-            const formData = new FormData();
-            formData.append('file', event.target.files[0]);
-
-
-            const response = await AxiosInstance.post("http://192.168.106.7:7040/api/traking-code-upload-file", formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            console.log('File uploaded successfully:', response.data);
-            if (response.status === 200) {
-                // setTrackLoading(false)
-
-                // console.log(loading.trakingCodeUploadFile)
-                if (response.data.hasFailedRecords) {
-                    response.data.unDoneRecords.map((items: unDoneRecords, index: number) => {
-                        if (items.status === 0) {
-                            console.log(index + " " + "CardNumberNotFound")
-                        } else if (items.status === 1) {
-                            console.log(index + " " + "WrongTrakingCodePattern")
-                        } else if (items.status === 2) {
-                            console.log(index + " " + "OneElementsIsEmpty")
-                        } else if (items.status === 3) {
-                            console.log(index + " " + "InistalStatusIsNotCorrect")
-                        }
-                    })
-                }
-            }
-        }
-
-
-    };
-
-
-    const handleButtonClick = () => {
-        // setLoading({...loading, trakingCodeUploadFile: true})
-        fileInputRef.current?.click();
-    };
-
-    useEffect(() => {
-
-    }, [trackLoading]);
-
-
-    if (!cardRequests) return (<p>loading</p>)
+    if (!cardRequest) return (<p>loading</p>)
 
 
     return (
         <>
-            <div className={'overflow-y-auto'}>
+            <div className={'shadow-none'}>
 
-
-                {/*///////////*/}
                 <div
-                    className="md:flex hidden items-center space-x-4 text-small mb-8 bg-white h-20 rounded-xl drop-shadow-lg px-8 justify-between">
+                    className="md:flex hidden items-center space-x-4 text-small mb-8 bg-white h-20 rounded-xl px-8 justify-between">
 
                     <div className={"font-black text-3xl md:text-justify text-center"}>لیست کارت های نقدی</div>
                     <div className={'flex items-center flex-row-reverse'}>
-                        <div><Input onChange={(e) => {
-                            handleInputChange(e)
-                        }} size={"lg"} placeholder={"جستجو"} className={"w-full"} startContent={
-                            <svg
-                                viewBox="0 0 512 512"
-                                fill="currentColor"
-                                height="1.5em"
-                                width="1.5em"
-                            >
-                                <path
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeMiterlimit={10}
-                                    strokeWidth={32}
-                                    d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z"
-                                />
-                                <path
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeMiterlimit={10}
-                                    strokeWidth={32}
-                                    d="M338.29 338.29L448 448"
-                                />
-                            </svg>}/></div>
+                        <div>
+                            <Input onChange={(e) => {
+                                handleInputChange(e)
+                            }}
+                                   size={"lg"} placeholder={"جستجو"} className={"w-full"}
+                                   startContent={
+                                       <svg
+                                           viewBox="0 0 512 512"
+                                           fill="currentColor"
+                                           height="1.5em"
+                                           width="1.5em"
+                                       >
+                                           <path
+                                               fill="none"
+                                               stroke="currentColor"
+                                               strokeMiterlimit={10}
+                                               strokeWidth={32}
+                                               d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z"
+                                           />
+                                           <path
+                                               fill="none"
+                                               stroke="currentColor"
+                                               strokeLinecap="round"
+                                               strokeMiterlimit={10}
+                                               strokeWidth={32}
+                                               d="M338.29 338.29L448 448"
+                                           />
+                                       </svg>
+                                   }/>
+                        </div>
 
-                        {hasAccess && <><div className={'h-10 border mx-6'}></div>
+                        {hasAccess && <>
+                            <div className={'h-10 border mx-6'}></div>
 
                             <div className={'flex'}>
-                        <Image src={Excel.src} alt={"search"} width={30} height={30}/>
-                        <Button variant={'light'} isLoading={loading?.cardRequestExcel} onClick={() => {
-                            cardRequestExcel()
-                        }}>دریافت فایل اکسل</Button>
-                    </div>
+                                <Image src={Excel.src} alt={"search"} width={30} height={30}/>
+                                <Button variant={'light'} isLoading={loading?.cardRequestExcel} onClick={() => {
+                                    cardRequestExcel()
+                                }}>دریافت فایل اکسل</Button>
+                            </div>
 
-                    <div className={'h-10 border'}></div>
+                            <div className={'h-10 border mx-6'}></div>
 
-                    <div className={'flex gap-3'}>
-                        <Image src={Print.src} alt={"search"} width={24} height={24}/>
-                        <Button variant={'light'} isLoading={loading?.updateExpectedCardRequests} onClick={() => {
-                            updateExpectedCardRequests()
-                        }}>تایید چاپ</Button>
-                    </div></>
-                    }
-                        {/*<div className={'h-10 border'}></div>*/}
+                            <div className={'flex gap-3'}>
+                                <Image src={Print.src} alt={"search"} width={24} height={24}/>
+                                <Button variant={'light'} isLoading={loading?.updateExpectedCardRequests}
+                                        onClick={() => {
+                                            updateExpectedCardRequests()
+                                        }}>تایید چاپ</Button>
+                            </div>
+                        </>
+                        }
+
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -682,11 +567,11 @@ const TableComponent = () => {
 
                     </div>
                 </div>
-                {/*///////////*/}
-                <Table
 
+                <Table
+                    className={"min-h-full"}
                     bottomContent={
-                        pages > 0 ? bottomContent : null
+                        pagination.total > 0 ? bottomContent : null
                     }
 
                     aria-label="Example table with custom cells"
@@ -708,10 +593,10 @@ const TableComponent = () => {
 
                                                 >
                                                     {statusList.map((item) => (
-                                                        <SelectItem key={item.id} value={selectedStatus}
+                                                        <SelectItem key={item.id} value={pagination.selectedStatus}
                                                                     onClick={() => {
-                                                                        setSelectedStatus(item.id)
-                                                                        setPage(1)
+                                                                        pagination.setSelectedStatus(item.id)
+                                                                        pagination.setPage(1)
                                                                     }}>
                                                             {item.label}
                                                         </SelectItem>
@@ -719,17 +604,16 @@ const TableComponent = () => {
                                                 </Select> </> :
                                             column.uid === "postNumber" && hasAccess ?
 
-                                                <div className={"flex items-center"}>
+                                                <div className={"flex items-center w-full gap-2"}>
 
-                                                    <Image src={Post.src} alt={"post img"} width={14} height={14}/>
-                                                    {trackLoading ? (<p>HI</p>) : <Button
-                                                        onClick={handleButtonClick}
-                                                        variant={'light'}
-                                                        // isLoading={trackLoading}
-                                                        // className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
-                                                    >
-                                                        {column.name}
-                                                    </Button>}
+                                                    <div onClick={handleButtonClick}
+                                                         className={'cursor-pointer '}>
+                                                        <Image src={PostIcon.src} alt={"post img"} width={14}
+                                                               height={14}/>
+                                                    </div>
+
+                                                    <div>   {column.name}</div>
+
 
                                                 </div>
                                                 :
@@ -745,7 +629,7 @@ const TableComponent = () => {
                         )}
                     </TableHeader>
 
-                    <TableBody items={cardRequests.data}>
+                    <TableBody items={cardRequest}>
                         {(card: Card) => (
                             <TableRow key={card.cardRequest.id}>
                                 {(columnKey) => <TableCell>{renderCell(card, columnKey)}</TableCell>}

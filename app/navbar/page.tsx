@@ -40,7 +40,7 @@ const Header = () => {
     const userCookie = getCookie("user")
 
 
-    if(!userCookie) return (<></>)
+    if (!userCookie) return (<></>)
     const user = JSON.parse(userCookie)
     return (
         <>
@@ -82,6 +82,7 @@ const Header = () => {
                     </NavbarItem>
                     <NavbarItem className={"w-[180px] md:w-60 md:mr-auto"}>
                         <Select
+
                             items={items}
                             label="انتخاب پنل"
                             color={"primary"}
