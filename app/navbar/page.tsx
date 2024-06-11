@@ -82,9 +82,7 @@ const Header = () => {
                     </NavbarItem>
                     <NavbarItem className={"w-[180px] md:w-60 md:mr-auto"}>
                         <Select
-
                             items={items}
-                            label="انتخاب پنل"
                             color={"primary"}
                             defaultSelectedKeys={[dashboards.find((dashboard) => {
                                 return dashboard.route.includes(pathName.split("/")[1])
