@@ -26,7 +26,7 @@ import AxiosInstance from "@/app/configurations/api/axiosInstance";
 import Image from "next/image";
 import Print from "@/app/card/assets/icons/Print.svg"
 import Excel from "@/app/card/assets/icons/excel.svg"
-import Post from "@/app/card/assets/icons/post.svg"
+import PostIcon from "@/app/card/assets/icons/post.svg"
 import More from "@/app/card/assets/icons/more.svg"
 import Button from "@/app/shard/components/Button";
 
@@ -165,7 +165,10 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
             })
         if (response.status === 200) {
             return response.data
-        } else return []
+        } else {
+            toast.error("خطا")
+            return []
+        }
     }
 
     const insertTrakingCode = async (cardNumber: string, trakingCode: string) => {
@@ -181,7 +184,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
 
                 return response.data;
             } else {
-
+                toast.error("خطا")
                 return [];
             }
         } catch (error) {
@@ -238,6 +241,8 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
             link.click();
             link.parentNode?.removeChild(link);
 
+        } else if (response.status !== 200) {
+            toast.error("لطفا کاربران رو تایید کنید ")
         }
         setLoading({...loading, cardRequestExcel: false})
     }
@@ -269,21 +274,25 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
                 if (response.data.hasFailedRecords) {
                     response.data.unDoneRecords.map((items: unDoneRecords, index: number) => {
                         if (items.status === 0) {
-                            toast.error("CardNumberNotFound")
+                            // toast.error("CardNumberNotFound")
+                            toast.error("شماره کارت کاربر پیدا نشد")
                         } else if (items.status === 1) {
-                            toast.error("WrongTrakingCodePattern")
+                            // toast.error("WrongTrakingCodePattern")
+                            toast.error("الگوی کد رهگیری اشتباه")
                         } else if (items.status === 2) {
-                            toast.error("OneElementsIsEmpty")
+                            // toast.error("OneElementsIsEmpty")
+                            toast.error("یک عنصر خالی است")
                         } else if (items.status === 3) {
                             toast.error("InistalStatusIsNotCorrect")
                         }
                     })
                 }
-            }
+            } else if (response.status !== 200) toast.error("خطای سیستمی")
         }
 
 
     };
+
 
     const handleButtonClick = () => {
         fileInputRef.current?.click();
@@ -489,38 +498,43 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
 
     return (
         <>
-            <div className={'overflow-y-auto'}>
+            <div className={'shadow-none'}>
 
                 <div
-                    className="md:flex hidden items-center space-x-4 text-small mb-8 bg-white h-20 rounded-xl drop-shadow-lg px-8 justify-between">
+                    className="md:flex hidden items-center space-x-4 text-small mb-8 bg-white h-20 rounded-xl px-8 justify-between">
 
                     <div className={"font-black text-3xl md:text-justify text-center"}>لیست کارت های نقدی</div>
                     <div className={'flex items-center flex-row-reverse'}>
-                        <div><Input onChange={(e) => {
-                            handleInputChange(e)
-                        }} size={"lg"} placeholder={"جستجو"} className={"w-full"} startContent={
-                            <svg
-                                viewBox="0 0 512 512"
-                                fill="currentColor"
-                                height="1.5em"
-                                width="1.5em"
-                            >
-                                <path
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeMiterlimit={10}
-                                    strokeWidth={32}
-                                    d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z"
-                                />
-                                <path
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeMiterlimit={10}
-                                    strokeWidth={32}
-                                    d="M338.29 338.29L448 448"
-                                />
-                            </svg>}/></div>
+                        <div>
+                            <Input onChange={(e) => {
+                                handleInputChange(e)
+                            }}
+                                   size={"lg"} placeholder={"جستجو"} className={"w-full"}
+                                   startContent={
+                                       <svg
+                                           viewBox="0 0 512 512"
+                                           fill="currentColor"
+                                           height="1.5em"
+                                           width="1.5em"
+                                       >
+                                           <path
+                                               fill="none"
+                                               stroke="currentColor"
+                                               strokeMiterlimit={10}
+                                               strokeWidth={32}
+                                               d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z"
+                                           />
+                                           <path
+                                               fill="none"
+                                               stroke="currentColor"
+                                               strokeLinecap="round"
+                                               strokeMiterlimit={10}
+                                               strokeWidth={32}
+                                               d="M338.29 338.29L448 448"
+                                           />
+                                       </svg>
+                                   }/>
+                        </div>
 
                         {hasAccess && <>
                             <div className={'h-10 border mx-6'}></div>
@@ -532,7 +546,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
                                 }}>دریافت فایل اکسل</Button>
                             </div>
 
-                            <div className={'h-10 border'}></div>
+                            <div className={'h-10 border mx-6'}></div>
 
                             <div className={'flex gap-3'}>
                                 <Image src={Print.src} alt={"search"} width={24} height={24}/>
@@ -590,15 +604,16 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
                                                 </Select> </> :
                                             column.uid === "postNumber" && hasAccess ?
 
-                                                <div className={"flex items-center"}>
+                                                <div className={"flex items-center w-full gap-2"}>
 
-                                                    <Image src={Post.src} alt={"post img"} width={14} height={14}/>
-                                                    <Button
-                                                        onClick={handleButtonClick}
-                                                        variant={'light'}
-                                                    >
-                                                        {column.name}
-                                                    </Button>
+                                                    <div onClick={handleButtonClick}
+                                                         className={'cursor-pointer '}>
+                                                        <Image src={PostIcon.src} alt={"post img"} width={14}
+                                                               height={14}/>
+                                                    </div>
+
+                                                    <div>   {column.name}</div>
+
 
                                                 </div>
                                                 :

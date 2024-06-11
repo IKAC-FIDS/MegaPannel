@@ -110,3 +110,15 @@ input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
+::-webkit-scrollbar {
+    width: 5px;
+
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(214, 214, 214, 0.96);
+    border-radius: 10px;
+}
+
+

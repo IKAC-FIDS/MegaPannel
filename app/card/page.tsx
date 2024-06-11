@@ -128,7 +128,7 @@ const CardPanel = () => {
     if (!cardRequests) return (<p>loading</p>)
     return (
         <>
-            <div className={"p-3 h-screen"}>
+            <div className={"p-12 h-screen"}>
 
                 <TableComponent
                     cardRequest={cardRequests.data}
