@@ -108,6 +108,9 @@ const CardPanel = () => {
         } else return []
 
     }
+
+    // http://192.168.67.17:4500
+    // http://192.168.106.6:4500
     const {
         data: cardRequests,
         isValidating,
