@@ -101,7 +101,7 @@ const CardPanel = () => {
         const statusCode = status ? `&status=${status}` : ""
 
         const response = await axiosInstance.get(
-            `http://192.168.106.6:4500/api/card-requests?currentPage=${currentPage ? currentPage : ""}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
+            `http://192.168.67.17:4500/api/card-requests?currentPage=${currentPage ? currentPage : ""}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
         );
         if (response.status === 200) {
             return response.data
@@ -110,12 +110,12 @@ const CardPanel = () => {
     }
 
     // http://192.168.67.17:4500
-    // http://192.168.106.6:4500
+    // http://192.168.67.17:4500
     const {
         data: cardRequests,
         isValidating,
         isLoading
-    } = useSWR(`http://192.168.106.6:4500/api/card-requests?page=${page}&status=${selectedStatus}&filter=${filter}`
+    } = useSWR(`http://192.168.67.17:4500/api/card-requests?page=${page}&status=${selectedStatus}&filter=${filter}`
         , async () => await getCardRequests(page, selectedStatus, filter), {keepPreviousData: true,});
 
 

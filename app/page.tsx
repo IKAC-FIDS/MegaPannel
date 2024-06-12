@@ -92,7 +92,7 @@ export default function Home() {
 
                             setLoading(true)
                             console.log("1")
-                            const login = await axiosInstance.post("http://localhost:4000/api/auth",
+                            const login = await axiosInstance.post("http://192.168.67.17:4000/api/auth",
                                 {
                                     "userName": credentials.userName,
                                     "password": credentials.password

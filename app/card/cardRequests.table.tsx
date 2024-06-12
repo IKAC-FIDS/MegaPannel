@@ -158,7 +158,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
 
 
     const updateTrakingCode = async (cardNumber: string, trakingCode: string) => {
-        const response = await axiosInstance.post(`http://192.168.106.6:4500/api/update-traking-code`,
+        const response = await axiosInstance.post(`http://192.168.67.17:4500/api/update-traking-code`,
             {
                 cardNumber: cardNumber,
                 trakingCode: trakingCode
@@ -175,7 +175,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
 
 
         try {
-            const response = await axiosInstance.post(`http://192.168.106.6:4500/api/insert-traking-code`, {
+            const response = await axiosInstance.post(`http://192.168.67.17:4500/api/insert-traking-code`, {
                 cardNumber: cardNumber,
                 trakingCode: trakingCode
             });
@@ -213,7 +213,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
 
     const updateExpectedCardRequests = async () => {
         setLoading({...loading, updateExpectedCardRequests: true})
-        const response = await axiosInstance.post(`http://192.168.106.6:4500/api/update-expected-card-requests`)
+        const response = await axiosInstance.post(`http://192.168.67.17:4500/api/update-expected-card-requests`)
         if (response.status === 200) {
             toast.success("تایید چاپ با موفقیت انجام شد")
         } else {
@@ -226,7 +226,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
     const cardRequestExcel = async (): Promise<void> => {
         setLoading({...loading, cardRequestExcel: true})
 
-        const response = await axiosInstance.get<Blob>(`http://192.168.106.6:4500/api/card-request-excel`, {responseType: 'arraybuffer'})
+        const response = await axiosInstance.get<Blob>(`http://192.168.67.17:4500/api/card-request-excel`, {responseType: 'arraybuffer'})
 
         if (response.status === 200) {
             setLoading({...loading, cardRequestExcel: false})
@@ -263,7 +263,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
             const formData = new FormData();
             formData.append('file', event.target.files[0]);
 
-            const response = await AxiosInstance.post("http://192.168.106.6:4500/api/traking-code-upload-file", formData, {
+            const response = await AxiosInstance.post("http://192.168.67.17:4500/api/traking-code-upload-file", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
