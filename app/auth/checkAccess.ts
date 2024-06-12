@@ -1,5 +1,7 @@
+import crypto from "crypto"
 import { jwtVerify, JWTVerifyResult } from 'jose';
 import {getCookie, getCookies} from "cookies-next";
+import axiosInstance from "@/app/configurations/api/axiosInstance";
 
 const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || 'secretKey');
 
@@ -12,20 +14,20 @@ interface DecodedToken {
 
 export async function checkAccess(access:string,accessToken:string | undefined) {
 
-
+    const permission = await axiosInstance.post("http://192.168.67.17:4000/api/permission",
+        {
+            "permission":access,
+           accessToken
+        }
+    )
     if (!accessToken) {
         return false
     }
-    try {
-        const { payload } = await jwtVerify(accessToken, secretKey) as JWTVerifyResult<DecodedToken>;
-        const { role, userName } = payload;
 
-        return role.includes(access);
-
-
-    } catch (error) {
-        console.error('JWT verification failed:', error);
-        return  false
+    if(permission.status===200){
+        return permission.data.permission
+    }else{
+        return false
     }
 }
 

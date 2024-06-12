@@ -6,6 +6,7 @@ import useSWR from "swr";
 import React, {useMemo, useState} from "react";
 import axiosInstance from "@/app/configurations/api/axiosInstance";
 import Button from "@/app/shard/components/Button";
+import card_base_url from "@/app/card/base_url_endpoint";
 
 
 export interface StatusStatistics {
@@ -101,7 +102,7 @@ const CardPanel = () => {
         const statusCode = status ? `&status=${status}` : ""
 
         const response = await axiosInstance.get(
-            `http://192.168.106.6:4500/api/card-requests?currentPage=${currentPage ? currentPage : ""}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
+            `${card_base_url}/card-requests?currentPage=${currentPage ? currentPage : ""}&pageSize=${10}${statusCode}&filter=${filter ?? null}`
         );
         if (response.status === 200) {
             return response.data
@@ -115,7 +116,7 @@ const CardPanel = () => {
         data: cardRequests,
         isValidating,
         isLoading
-    } = useSWR(`http://192.168.106.6:4500/api/card-requests?page=${page}&status=${selectedStatus}&filter=${filter}`
+    } = useSWR(`${card_base_url}/card-requests?page=${page}&status=${selectedStatus}&filter=${filter}`
         , async () => await getCardRequests(page, selectedStatus, filter), {keepPreviousData: true,});
 
 

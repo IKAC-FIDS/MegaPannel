@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
             status: 200,
             headers: {
                 "Content-Type": "application/json",
-                "Set-Cookie": `accessToken=; HttpOnly; Path=/; Max-Age=3600`,
+                "Set-Cookie":  `accessToken=deleted; Max-Age=0; HttpOnly; Path=/`,
             },
         });
     } catch (error) {

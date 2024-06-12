@@ -10,8 +10,10 @@ const useAccessCheck = (access: string): boolean | null => {
     useEffect(() => {
         const verifyAccess = async () => {
 
-            const accessStatus = await checkAccess(access,accessToken);
-            setHasAccess(accessStatus);
+            if(accessToken) {
+                const accessStatus = await checkAccess(access, accessToken);
+                setHasAccess(accessStatus);
+            }
         };
 
         verifyAccess();

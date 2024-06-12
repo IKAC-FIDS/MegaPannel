@@ -1,4 +1,4 @@
-import React, {ReactNode, useRef, useState} from "react";
+import React, {ReactNode, useEffect, useRef, useState} from "react";
 import {
     Card,
     CardBody,
@@ -43,6 +43,8 @@ import {
 } from "@/app/card/page";
 import {log} from "node:util";
 import useSWR from "swr";
+import useAccessCheck from "@/app/shard/hooks/useAccessCheck";
+import card_base_url from "@/app/card/base_url_endpoint";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     1: "warning",
@@ -115,7 +117,7 @@ export const statusList = [
         label: "ناموفق"
     }, {
         id: 4,
-        label: "چاپ شده"
+        label: "ارسال شده"
     }, {
         id: 5,
         label: "فعال"
@@ -141,8 +143,14 @@ export const statusList = [
 
 const TableComponent = ({cardRequest, pagination}: TableProps) => {
     let typingTimeout: NodeJS.Timeout | null = null;
-    const hasAccess = true
+    const hasAccess = useAccessCheck("card_operation")
 
+
+
+    useEffect(()=>{
+
+        console.log(hasAccess)
+    },[hasAccess])
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -158,7 +166,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
 
 
     const updateTrakingCode = async (cardNumber: string, trakingCode: string) => {
-        const response = await axiosInstance.post(`http://192.168.106.6:4500/api/update-traking-code`,
+        const response = await axiosInstance.post(`${card_base_url}/update-traking-code`,
             {
                 cardNumber: cardNumber,
                 trakingCode: trakingCode
@@ -175,7 +183,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
 
 
         try {
-            const response = await axiosInstance.post(`http://192.168.106.6:4500/api/insert-traking-code`, {
+            const response = await axiosInstance.post(`${card_base_url}/insert-traking-code`, {
                 cardNumber: cardNumber,
                 trakingCode: trakingCode
             });
@@ -213,7 +221,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
 
     const updateExpectedCardRequests = async () => {
         setLoading({...loading, updateExpectedCardRequests: true})
-        const response = await axiosInstance.post(`http://192.168.106.6:4500/api/update-expected-card-requests`)
+        const response = await axiosInstance.post(`${card_base_url}/update-expected-card-requests`)
         if (response.status === 200) {
             toast.success("تایید چاپ با موفقیت انجام شد")
         } else {
@@ -226,7 +234,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
     const cardRequestExcel = async (): Promise<void> => {
         setLoading({...loading, cardRequestExcel: true})
 
-        const response = await axiosInstance.get<Blob>(`http://192.168.106.6:4500/api/card-request-excel`, {responseType: 'arraybuffer'})
+        const response = await axiosInstance.get<Blob>(`${card_base_url}/card-request-excel`, {responseType: 'arraybuffer'})
 
         if (response.status === 200) {
             setLoading({...loading, cardRequestExcel: false})
@@ -263,7 +271,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
             const formData = new FormData();
             formData.append('file', event.target.files[0]);
 
-            const response = await AxiosInstance.post("http://192.168.106.6:4500/api/traking-code-upload-file", formData, {
+            const response = await AxiosInstance.post("${card_base_url}/traking-code-upload-file", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -397,7 +405,7 @@ const TableComponent = ({cardRequest, pagination}: TableProps) => {
 
 
                             (
-                                <Input isDisabled={!hasAccess ||
+                                <Input isDisabled={hasAccess ||
                                     !(card.cardRequest.status === 4 || card.cardRequest.status === 9)}
                                        type={"number"}
                                        className={"text-center w-36 h-9 rounded-none"}

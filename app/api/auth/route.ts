@@ -3,6 +3,8 @@ import {NextRequest} from 'next/server';
 import loginService from '@/app/auth/login.service';
 import {SignJWT} from 'jose';
 import {log} from "node:util";
+import crypto from "crypto"
+
 
 const accessList = {
     full: ["card", "card_operation", "identities", "identities_operation", "services"],
@@ -21,6 +23,16 @@ const users = [
         name: "admin",
         pass: "Farzad@123@",
         role: roles.main,
+        dashboards: [
+            {
+                label: "مدیریت کارت ها",
+                route: "/card"
+            },
+            {
+                label: "احراز هویت",
+                route: "/identities"
+            }
+        ],
         path: "/card",
         title: "مدیر سیستم",
         fullName: "فرزاد نوروزی فرد",
@@ -30,6 +42,16 @@ const users = [
         name: "ceo",
         pass: "RH@123@",
         role: roles.main,
+        dashboards: [
+            {
+                label: "مدیریت کارت ها",
+                route: "/card"
+            },
+            {
+                label: "احراز هویت",
+                route: "/identities"
+            }
+        ],
         path: "/card",
         title: "مدیر عامل",
         fullName: "رامبد حیدریان",
@@ -39,6 +61,16 @@ const users = [
         name: "operation",
         pass: "MA@123@",
         role: roles.operation,
+        dashboards: [
+            {
+                label: "مدیریت کارت ها",
+                route: "/card"
+            },
+            {
+                label: "احراز هویت",
+                route: "/identities"
+            }
+        ],
         path: "/identities",
         title: "مدیر عملیات",
         fullName: "منصور آهاری",
@@ -48,6 +80,16 @@ const users = [
         name: "operation1",
         pass: "SM@123@",
         role: roles.operation,
+        dashboards: [
+            {
+                label: "مدیریت کارت ها",
+                route: "/card"
+            },
+            {
+                label: "احراز هویت",
+                route: "/identities"
+            }
+        ],
         path: "/identities",
         title: "کارشناس عملیات 1",
         fullName: "سمیه منافی",
@@ -57,6 +99,16 @@ const users = [
         name: "operation2",
         pass: "ZG@123@",
         role: roles.operation,
+        dashboards: [
+            {
+                label: "مدیریت کارت ها",
+                route: "/card"
+            },
+            {
+                label: "احراز هویت",
+                route: "/identities"
+            }
+        ],
         path: "/identities",
         title: "کارشناس عملیات 2",
         fullName: "زهرا گلیج",
@@ -65,7 +117,13 @@ const users = [
     {
         name: "card",
         pass: "AS@123@",
-        role: roles.operation,
+        role: roles.cardAdmin,
+        dashboards: [
+            {
+                label: "مدیریت کارت ها",
+                route: "/card"
+            }
+        ],
         path: "/card",
         title: "مدیر صدور کارت",
         fullName: "علی صولت تاش",
@@ -74,7 +132,13 @@ const users = [
     {
         name: "card1",
         pass: "MG@123@",
-        role: roles.operation,
+        role: roles.cardAdmin,
+        dashboards: [
+            {
+                label: "مدیریت کارت ها",
+                route: "/card"
+            }
+        ],
         path: "/card",
         title: "کارشناس صدور کارت 1",
         fullName: "محمد قربانعلی",
@@ -83,7 +147,12 @@ const users = [
     {
         name: "card2",
         pass: "FN@123@",
-        role: roles.operation,
+        role: roles.cardAdmin, dashboards: [
+            {
+                label: "مدیریت کارت ها",
+                route: "/card"
+            }
+        ],
         path: "/card",
         title: "کارشناس صدور کارت 2",
         fullName: "فاطمه نیک آیین",
@@ -91,7 +160,7 @@ const users = [
     },
 
 ]
-const secretKey =  new TextEncoder().encode(process.env.JWT_SECRET);
+const secretKey = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function POST(request: NextRequest) {
 
@@ -100,7 +169,6 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const user = users.find((user) => user.name === body.userName && user.pass === body.password);
         const login = await loginService(user ? {userName: "s.kalami", password: "12345678"} : body);
-
 
 
         if (login.status !== 200) {
@@ -122,6 +190,7 @@ export async function POST(request: NextRequest) {
             login: login.data,
             path: user?.path ?? "card",
             user: {fullName: user?.fullName, title: user?.title, image: user?.image},
+            dashboards:user?.dashboards,
             accessToken
         }), {
             status: login.status,

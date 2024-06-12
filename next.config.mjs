@@ -4,7 +4,7 @@
 
 export default {
     env: {
-        JWT_SECRET: 'my-value',
+        JWT_SECRET: 'podfgkrjorijhgfouijhvijhjorjogjofdhjfvhnjgnhrifdas%^(%(G*GGBV*VRVDASDB#@#$%$3kjrhfdjkhfv',
     },
     async headers() {
         return [
