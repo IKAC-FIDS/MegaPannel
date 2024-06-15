@@ -40,14 +40,9 @@ import axiosInstance from "@/app/configurations/api/axiosInstance";
 //     }
 // }
 
-const items = dashboards
+// const dashboards = dashboards
 
-// const items = JSON.parse(localStorage.getItem("dashboards") ?? "[]")
-
-// console.log( itemss)
-
-
-items.push({label: "خروج", route: "/"})
+interface dashboard{ label: string; route: string }
 
 const Header = () => {
 
@@ -57,7 +52,20 @@ const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const userCookie = getCookie("user")
+    const dashboards: dashboard[] = [];
 
+    if (typeof window !== 'undefined') {
+        const storedDashboards = JSON.parse(localStorage.getItem("dashboards") ?? "[]")
+        storedDashboards.forEach((item:dashboard )=> dashboards.push(item));
+    }
+
+
+
+
+// console.log( itemss)
+
+
+    dashboards.push({label: "خروج", route: "/"})
 
     if (!userCookie) return (<></>)
     const user = JSON.parse(userCookie)
@@ -101,7 +109,7 @@ const Header = () => {
                     </NavbarItem>
                     <NavbarItem className={"w-[180px] md:w-60 md:mr-auto"}>
                         <Select
-                            items={items}
+                            items={dashboards}
                             color={"primary"}
                             defaultSelectedKeys={[dashboards.find((dashboard) => {
                                 return dashboard.route.includes(pathName.split("/")[1])
