@@ -2,7 +2,7 @@
 
 import "./globals.css";
 import {usePathname} from 'next/navigation'
-import Navbar from "@/app/navbar/page"
+import Navbar from "@/app/navbar"
 import Sidebar from "@/app/sidebar/page";
 
 import localFont from "@next/font/local";

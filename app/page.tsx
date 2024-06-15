@@ -115,7 +115,7 @@ export default function Home() {
                                 setCookie("token", login.data.login.token);
                                 setCookie("refreshToken",login.data.login.refreshToken)
                                 setCookie("user", login.data.user);
-                                // if( typeof window !== "undefined"){ localStorage.setItem("dashboards", JSON.stringify(login.data.dashboards));
+                                // if( typeof window !== "undefined"){ localStorage.setItem("dashboards", JSON.stringify(login.data.dashboards));}
                                 router.push(login.data.path ?? "/identities")
                             }
                             setLoading(false)

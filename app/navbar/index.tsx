@@ -27,7 +27,6 @@ import {deleteCookie, getCookie} from "cookies-next";
 import axiosInstance from "@/app/configurations/api/axiosInstance";
 
 
-
 // const getItems = ()=>{
 //
 //     if( typeof window !== "undefined"){
@@ -42,6 +41,11 @@ import axiosInstance from "@/app/configurations/api/axiosInstance";
 // }
 
 const items = dashboards
+
+// const items = JSON.parse(localStorage.getItem("dashboards") ?? "[]")
+
+// console.log( itemss)
+
 
 items.push({label: "خروج", route: "/"})
 
@@ -112,8 +116,8 @@ const Header = () => {
                                     value={dashboard.label}
                                     onClick={async () => {
                                         if (dashboard.route === "/") {
-
-                                        await axiosInstance.post("http://192.168.67.17:4000/api/logout")
+                                            // localStorage.removeItem("dashboards")
+                                            await axiosInstance.post("http://192.168.67.17:4000/api/logout")
                                         }
                                     }}>
                                     {dashboard.label}
