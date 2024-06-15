@@ -130,7 +130,7 @@ export const dashboards = [
     //     route: "/services"
     // },
     {
-        label: "اهراز هویت",
+        label: "احراز هویت",
         route: "/identities"
     }
     // {

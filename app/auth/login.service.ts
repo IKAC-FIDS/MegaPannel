@@ -21,14 +21,6 @@ const loginService = async (credentials: {
         }
     );
 
-    if (response.status === 200) {
-        const {
-            token,
-            refreshToken,
-        } = response.data;
-        setCookie("token",token)
-        setCookie("refreshToken",refreshToken)
-    }
 
     return response;
 };
